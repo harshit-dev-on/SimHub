@@ -126,8 +126,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         views: "1 learner",
         viewsCount: 1,
         uploadedAt: "Just now",
-        likes: 1,
-        subscribers: "1.2K educators",
         durationLabel: "Interactive Sim",
         reportsCount: 0,
         isUserUploaded: true,

@@ -56,8 +56,8 @@ export interface SimulationEntry {
   views: string;
   viewsCount: number;
   uploadedAt: string;
-  likes: number;
-  subscribers: string;
+  likes?: number;
+  subscribers?: string;
   isSubscribed?: boolean;
   durationLabel: string;
   fingerprint?: {
@@ -88,7 +88,221 @@ class EcoVerseStore {
     this.repoBDriftActive = false;
 
     this.simulations = [
-      // 1. REPO B - Carbon Bathtub Stand-in (Primary Demo Simulator)
+      // 1. Gradient Descent
+      {
+        id: "sim-gradient-descent",
+        title: "Gradient Descent",
+        description:
+          "Explore 2D and 3D loss surfaces, non-convex double wells, learning rates (η), and momentum dynamics with step-by-step convergence telemetry.",
+        topic: "Machine Learning & Optimization",
+        gradeLevel: "College / Advanced STEM",
+        repoUrl: "https://github.com/simhub-stem/gradient-descent-lab",
+        liveUrl: "https://distill.pub/2017/momentum/",
+        authorLogin: "dr-thorne",
+        authorName: "Dr. Aris Thorne",
+        authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        authorNumericId: 9841234,
+        repoNumericId: 91402318,
+        license: "MIT",
+        status: "approved",
+        warnings: [],
+        observationPrompt:
+          "Tune the learning rate η from 0.001 to 0.5. Observe the onset of oscillatory overshoot and divergence in non-convex valleys.",
+        thumbnailUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=640&auto=format&fit=crop&q=80",
+        screenshots: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=640&auto=format&fit=crop&q=80"],
+        views: "34.8K learners",
+        viewsCount: 34820,
+        uploadedAt: "1 day ago",
+        likes: 2150,
+        subscribers: "15.4K researchers",
+        durationLabel: "Interactive Lab",
+        reportsCount: 0,
+        questions: [
+          {
+            id: "q-gd-1",
+            question: "What happens when the learning rate (η) is set too high on a steep quadratic bowl?",
+            options: [
+              { id: "opt-1", text: "Convergence accelerates monotonically.", isCorrect: false },
+              { id: "opt-2", text: "The parameter oscillates and diverges away from the global minimum.", isCorrect: true },
+              { id: "opt-3", text: "The gradient immediately equals zero.", isCorrect: false },
+            ],
+            explanation: "Overstepping occurs when the step size η·∇f exceeds the curvature threshold 2/L, causing explosive divergence.",
+          },
+        ],
+        comments: [
+          {
+            id: "c-gd-1",
+            authorName: "Maya Lin",
+            authorAvatar: "https://api.dicebear.com/7.x/lorelei/svg?seed=MayaGreen",
+            text: "The real-time contour loss curves helped me visualize momentum term damping!",
+            timestamp: "3 hours ago",
+            likes: 28,
+            hasMindChangedBadge: true,
+          },
+        ],
+      },
+
+      // 2. Monty Hall Problem
+      {
+        id: "sim-monty-hall",
+        title: "Monty Hall Problem",
+        description:
+          "Test the famous 3-door probability paradox through interactive single-play reveals and high-speed Monte Carlo batch simulations (N = 10,000).",
+        topic: "Probability & Game Theory",
+        gradeLevel: "High School / College",
+        repoUrl: "https://github.com/simhub-stem/monty-hall-paradox",
+        liveUrl: "https://www.mathwarehouse.com/monty-hall-simulation-website/",
+        authorLogin: "priya-stem",
+        authorName: "Priya Sharma",
+        authorAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+        authorNumericId: 104523,
+        repoNumericId: 82410952,
+        license: "MIT",
+        status: "approved",
+        warnings: [],
+        observationPrompt:
+          "Run 1,000 trials with 'Always Switch' versus 'Stay'. Compare empirical win rate with the theoretical 2/3 vs 1/3 expectation.",
+        thumbnailUrl: "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?w=640&auto=format&fit=crop&q=80",
+        screenshots: ["https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?w=640&auto=format&fit=crop&q=80"],
+        views: "42.1K learners",
+        viewsCount: 42100,
+        uploadedAt: "2 days ago",
+        likes: 3100,
+        subscribers: "18.2K students",
+        durationLabel: "Interactive Sim",
+        reportsCount: 0,
+        questions: [
+          {
+            id: "q-mh-1",
+            question: "Why does switching doors yield a 2/3 win probability instead of 1/2?",
+            options: [
+              { id: "opt-1", text: "Because the host knows where the prize is and always reveals a goat, concentrating probability on the unchosen door.", isCorrect: true },
+              { id: "opt-2", text: "Because each remaining door is always 50/50 independent.", isCorrect: false },
+              { id: "opt-3", text: "It is purely an empirical artifact of small sample sizes.", isCorrect: false },
+            ],
+            explanation: "Your initial choice has only a 1/3 chance of being correct. Since the host filters out a losing door, the remaining unopened door carries the other 2/3 probability mass.",
+          },
+        ],
+        comments: [
+          {
+            id: "c-mh-1",
+            authorName: "Rohan V.",
+            authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=RohanEarth",
+            text: "Ran 10,000 iterations: switching won 66.8% of the time. Mind completely blown!",
+            timestamp: "5 hours ago",
+            likes: 45,
+            hasMindChangedBadge: true,
+          },
+        ],
+      },
+
+      // 3. Projectile Motion
+      {
+        id: "sim-projectile-motion",
+        title: "Projectile Motion",
+        description:
+          "Analyze 2D ballistic trajectories, aerodynamic drag coefficients (C_d), Magnus spin effect, and optimal launch angles in real-time vector phase space.",
+        topic: "Classical Kinematics",
+        gradeLevel: "High School / College",
+        repoUrl: "https://github.com/phet-interactive/projectile-motion",
+        liveUrl: "https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_all.html",
+        authorLogin: "phet-team",
+        authorName: "PhET Interactive Physics",
+        authorAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+        authorNumericId: 4891023,
+        repoNumericId: 67104921,
+        license: "GPL-3.0",
+        status: "approved",
+        warnings: [],
+        observationPrompt:
+          "Toggle air drag on and off at 45°. Notice how air resistance skews the parabolic peak and shifts optimal range angle downward.",
+        thumbnailUrl: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=640&auto=format&fit=crop&q=80",
+        screenshots: ["https://images.unsplash.com/photo-1509228468518-180dd4864904?w=640&auto=format&fit=crop&q=80"],
+        views: "58.3K learners",
+        viewsCount: 58300,
+        uploadedAt: "4 days ago",
+        likes: 4200,
+        subscribers: "24.1K educators",
+        durationLabel: "Vector Physics",
+        reportsCount: 0,
+        questions: [
+          {
+            id: "q-pm-1",
+            question: "When quadratic air resistance is included, the optimal launch angle for maximum horizontal range is:",
+            options: [
+              { id: "opt-1", text: "Strictly less than 45°.", isCorrect: true },
+              { id: "opt-2", text: "Exactly 45° regardless of drag.", isCorrect: false },
+              { id: "opt-3", text: "Strictly greater than 45°.", isCorrect: false },
+            ],
+            explanation: "Because air resistance decelerates the projectile throughout flight, spending less time aloft in the horizontal drag regime yields a flatter, lower trajectory (<45°).",
+          },
+        ],
+        comments: [
+          {
+            id: "c-pm-1",
+            authorName: "Anil Kapoor",
+            authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+            text: "Terrific for teaching vectors in Newtonian mechanics.",
+            timestamp: "1 day ago",
+            likes: 19,
+          },
+        ],
+      },
+
+      // 4. Electron Clouding (3D Quantum Orbitals)
+      {
+        id: "sim-electron-cloud",
+        title: "Electron Clouding: Hydrogen Orbital Wavefunctions",
+        description:
+          "Visualize 3D quantum probability density distributions (ψ²), spherical harmonics (Y_lm), and radial nodes for hydrogenic orbitals (s, p, d, f).",
+        topic: "Quantum Physics",
+        gradeLevel: "College / Advanced STEM",
+        repoUrl: "https://github.com/simhub-stem/quantum-orbitals-3d",
+        liveUrl: "https://falstad.com/qmatom/",
+        authorLogin: "dr-thorne",
+        authorName: "Dr. Aris Thorne",
+        authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        authorNumericId: 9841234,
+        repoNumericId: 77891240,
+        license: "MIT",
+        status: "approved",
+        warnings: [],
+        observationPrompt:
+          "Select the 3d_z² state. Rotate in 3D and inspect the nodal cones where electron probability amplitude drops to exactly zero.",
+        thumbnailUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=640&auto=format&fit=crop&q=80",
+        screenshots: ["https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=640&auto=format&fit=crop&q=80"],
+        views: "29.4K learners",
+        viewsCount: 29400,
+        uploadedAt: "3 days ago",
+        likes: 1890,
+        subscribers: "14.2K students",
+        durationLabel: "3D WebGL",
+        reportsCount: 0,
+        questions: [
+          {
+            id: "q-ec-1",
+            question: "What determines the angular nodal planes in a hydrogenic orbital wavefunction?",
+            options: [
+              { id: "opt-1", text: "The principal quantum number n.", isCorrect: false },
+              { id: "opt-2", text: "The azimuthal/orbital angular momentum quantum number l.", isCorrect: true },
+              { id: "opt-3", text: "The electron spin s.", isCorrect: false },
+            ],
+            explanation: "The angular wavefunction Y_lm has exactly l angular nodal surfaces (planes or cones), while the radial part has (n - l - 1) radial nodes.",
+          },
+        ],
+        comments: [
+          {
+            id: "c-ec-1",
+            authorName: "Elena Rostova",
+            authorAvatar: "https://api.dicebear.com/7.x/personas/svg?seed=Elena",
+            text: "Seeing the probability density slices in 3D makes quantum chemistry so much more intuitive!",
+            timestamp: "6 hours ago",
+            likes: 31,
+          },
+        ],
+      },
+
+      // 5. REPO B - Carbon Bathtub Stand-in
       {
         id: "sim-repo-b",
         title: "The Carbon Bathtub: Atmospheric CO₂ Stock & Flow Simulation",

@@ -5,6 +5,7 @@ import { YouTubeHeader } from "@/components/YouTubeHeader";
 import { YouTubeSidebar } from "@/components/YouTubeSidebar";
 import { YouTubeFeed } from "@/components/YouTubeFeed";
 import { WatchView } from "@/components/WatchView";
+import { SubscriptionsFeed } from "@/components/SubscriptionsFeed";
 import { UploadModal } from "@/components/UploadModal";
 import { AuthModal } from "@/components/AuthModal";
 import { ProfileSetupModal } from "@/components/ProfileSetupModal";
@@ -37,7 +38,9 @@ export default function Home() {
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const [currentView, setCurrentView] = useState<"feed" | "watch" | "verify" | "admin">("feed");
+  const [currentView, setCurrentView] = useState<
+    "feed" | "watch" | "verify" | "admin" | "subscriptions"
+  >("feed");
   const [selectedSim, setSelectedSim] = useState<SimulationEntry | null>(null);
 
   const [simulations, setSimulations] = useState<SimulationEntry[]>([]);
@@ -184,7 +187,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-red-600/30 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#EBF0F5] text-stone-900 font-sans selection:bg-red-600/30 selection:text-stone-900">
       {/* YouTube Style Header */}
       <YouTubeHeader
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -209,14 +212,16 @@ export default function Home() {
           activeTopic={selectedTopic}
           setActiveTopic={setSelectedTopic}
           onGoHome={handleGoHome}
+          onOpenSubscriptions={() => setCurrentView("subscriptions")}
           onOpenUpload={() => setIsUploadModalOpen(true)}
           onOpenAdmin={() => setCurrentView("admin")}
           onOpenEducatorVerify={() => setCurrentView("verify")}
           hasMindChangedBadge={hasMindChangedBadge}
+          currentView={currentView}
         />
 
         {/* Dynamic Main Views */}
-        <main className="flex-1 overflow-y-auto bg-slate-950">
+        <main className="flex-1 overflow-y-auto bg-[#EBF0F5]">
           {currentView === "feed" && (
             <YouTubeFeed
               simulations={simulations}
@@ -224,6 +229,15 @@ export default function Home() {
               setSelectedTopic={setSelectedTopic}
               onSelectSimulation={handleSelectSimulation}
               searchQuery={searchQuery}
+              user={user}
+            />
+          )}
+
+          {currentView === "subscriptions" && (
+            <SubscriptionsFeed
+              simulations={simulations}
+              onSelectSimulation={handleSelectSimulation}
+              onGoHome={handleGoHome}
             />
           )}
 

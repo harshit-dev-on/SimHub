@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EcoVerse Hub | Challenge-Verified Environmental Simulation Registry",
+  title: "SimHub | Visualizing Complex Concepts for Students",
   description:
-    "A centrally moderated, challenge-verified registry of externally hosted environmental simulations with a predict-observe-explain learning loop.",
+    "Interactive STEM discovery studio and simulation registry for physics, mathematics, and environmental science with predict-observe-explain loops.",
 };
 
 export default function RootLayout({
@@ -26,9 +26,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500/30 selection:text-emerald-300">
+      <body className="min-h-full flex flex-col bg-[#F1F3F5] text-slate-900 selection:bg-rose-500/20 selection:text-rose-900 font-sans">
         {children}
       </body>
     </html>
