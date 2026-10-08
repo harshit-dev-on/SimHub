@@ -1,30 +1,175 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
-import { LearnerExplorer } from "@/components/LearnerExplorer";
+import { YouTubeHeader } from "@/components/YouTubeHeader";
+import { YouTubeSidebar } from "@/components/YouTubeSidebar";
+import { YouTubeFeed } from "@/components/YouTubeFeed";
+import { WatchView } from "@/components/WatchView";
+import { UploadModal } from "@/components/UploadModal";
+import { AuthModal } from "@/components/AuthModal";
 import { EducatorConsole } from "@/components/EducatorConsole";
 import { AdminQueue } from "@/components/AdminQueue";
 import { StageDemoHud } from "@/components/StageDemoHud";
+import { SimulationEntry } from "@/lib/store";
+import {
+  DEMO_USERS,
+  UserProfile,
+  isLiveSupabaseConfigured,
+  supabase,
+  mapSupabaseUserToProfile,
+} from "@/lib/supabase";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"learner" | "educator" | "admin" | "hud">("learner");
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("simhub_user");
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return null;
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const [currentView, setCurrentView] = useState<"feed" | "watch" | "verify" | "admin" | "hud">("feed");
+  const [selectedSim, setSelectedSim] = useState<SimulationEntry | null>(null);
+
+  const [simulations, setSimulations] = useState<SimulationEntry[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const [hasMindChangedBadge, setHasMindChangedBadge] = useState(false);
   const [isDriftActive, setIsDriftActive] = useState(false);
 
-  const fetchDriftState = async () => {
+  // Restore session from localStorage on mount and sync with Supabase
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedUserStr = localStorage.getItem("simhub_user");
+      if (savedUserStr) {
+        try {
+          setUser(JSON.parse(savedUserStr));
+        } catch (e) {
+          console.error(e);
+        }
+      } else if (!isLiveSupabaseConfigured) {
+        setUser(DEMO_USERS[0]);
+      }
+
+      // Check if arriving with a PKCE code on the homepage directly
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+      if (code && isLiveSupabaseConfigured) {
+        supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+          if (data?.session?.user) {
+            const profile = mapSupabaseUserToProfile(data.session.user);
+            setUser(profile);
+            localStorage.setItem("simhub_user", JSON.stringify(profile));
+            // Clean the URL query params without full page reload
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        });
+      }
+    }
+
+    if (isLiveSupabaseConfigured) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          const profile = mapSupabaseUserToProfile(session.user);
+          setUser(profile);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("simhub_user", JSON.stringify(profile));
+          }
+        }
+      });
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          const profile = mapSupabaseUserToProfile(session.user);
+          setUser(profile);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("simhub_user", JSON.stringify(profile));
+          }
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("simhub_user");
+          }
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, []);
+
+  const handleLoginSuccess = (loggedInUser: UserProfile) => {
+    setUser(loggedInUser);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("simhub_user", JSON.stringify(loggedInUser));
+    }
+  };
+
+  const handleLogout = async () => {
+    if (isLiveSupabaseConfigured) {
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setUser(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("simhub_user");
+    }
+  };
+
+  // Load simulations catalogue and drift state
+  const loadData = async () => {
     try {
-      const res = await fetch("/api/mock-sim/repo-b/toggle-drift");
+      const res = await fetch("/api/submissions");
       const data = await res.json();
-      setIsDriftActive(data.driftActive ?? false);
+      if (data.simulations) {
+        setSimulations(data.simulations);
+      }
+
+      const driftRes = await fetch("/api/mock-sim/repo-b/toggle-drift");
+      const driftData = await driftRes.json();
+      setIsDriftActive(driftData.driftActive ?? false);
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchDriftState();
-  }, []);
+    loadData();
+    if (typeof window !== "undefined") {
+      setHasMindChangedBadge(localStorage.getItem("ecoverse_badge_mind_changed") === "true");
+    }
+  }, [refreshTrigger]);
+
+  const handleSelectSimulation = (sim: SimulationEntry) => {
+    setSelectedSim(sim);
+    setCurrentView("watch");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleGoHome = () => {
+    setCurrentView("feed");
+    setSelectedSim(null);
+  };
+
+  const handleUploadSuccess = (newSim: SimulationEntry) => {
+    setSimulations((prev) => [newSim, ...prev]);
+    setSelectedSim(newSim);
+    setCurrentView("watch");
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   const handleResetDemo = async () => {
     try {
@@ -52,61 +197,114 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      {/* Navigation */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-red-600/30 selection:text-white">
+      {/* YouTube Style Header */}
+      <YouTubeHeader
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onOpenUpload={() => setIsUploadModalOpen(true)}
+        user={user}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
+        onGoHome={handleGoHome}
+        onOpenHud={() => setCurrentView("hud")}
         onResetDemo={handleResetDemo}
-        isDriftActive={isDriftActive}
       />
 
-      {/* Main View Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {activeTab === "learner" && (
-          <LearnerExplorer
-            onReportSimulation={(id) => {
-              setRefreshTrigger((prev) => prev + 1);
-            }}
-            refreshTrigger={refreshTrigger}
-          />
-        )}
+      {/* Main Body: Sidebar + Dynamic Content View */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left YouTube Navigation Drawer */}
+        <YouTubeSidebar
+          isOpen={isSidebarOpen}
+          activeTopic={selectedTopic}
+          setActiveTopic={setSelectedTopic}
+          onGoHome={handleGoHome}
+          onOpenUpload={() => setIsUploadModalOpen(true)}
+          onOpenAdmin={() => setCurrentView("admin")}
+          onOpenHud={() => setCurrentView("hud")}
+          onOpenEducatorVerify={() => setCurrentView("verify")}
+          hasMindChangedBadge={hasMindChangedBadge}
+        />
 
-        {activeTab === "educator" && (
-          <EducatorConsole
-            onSubmissionSuccess={() => {
-              setRefreshTrigger((prev) => prev + 1);
-              setActiveTab("admin");
-            }}
-          />
-        )}
+        {/* Dynamic Main Views */}
+        <main className="flex-1 overflow-y-auto bg-slate-950">
+          {currentView === "feed" && (
+            <YouTubeFeed
+              simulations={simulations}
+              selectedTopic={selectedTopic}
+              setSelectedTopic={setSelectedTopic}
+              onSelectSimulation={handleSelectSimulation}
+              searchQuery={searchQuery}
+            />
+          )}
 
-        {activeTab === "admin" && (
-          <AdminQueue
-            onQueueUpdated={() => {
-              setRefreshTrigger((prev) => prev + 1);
-            }}
-            refreshTrigger={refreshTrigger}
-          />
-        )}
+          {currentView === "watch" && selectedSim && (
+            <WatchView
+              simulation={selectedSim}
+              allSimulations={simulations}
+              onSelectSimulation={handleSelectSimulation}
+              onReportSimulation={(id) => {
+                setRefreshTrigger((prev) => prev + 1);
+                handleGoHome();
+              }}
+              user={user}
+            />
+          )}
 
-        {activeTab === "hud" && (
-          <StageDemoHud
-            onSwitchTab={(tab) => setActiveTab(tab)}
-            onResetDemo={handleResetDemo}
-            isDriftActive={isDriftActive}
-            onToggleDrift={handleToggleDrift}
-          />
-        )}
-      </main>
+          {currentView === "verify" && (
+            <div className="max-w-7xl mx-auto p-4 sm:p-6">
+              <EducatorConsole
+                onSubmissionSuccess={() => {
+                  setRefreshTrigger((prev) => prev + 1);
+                  setCurrentView("admin");
+                }}
+              />
+            </div>
+          )}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>EcoVerse Hub • Centrally Moderated Registry of Externally Hosted Simulations</span>
-          <span className="font-mono text-slate-600">DPDP Act 2023 Compliant • NEP 2020 Aligned</span>
-        </div>
-      </footer>
+          {currentView === "admin" && (
+            <div className="max-w-7xl mx-auto p-4 sm:p-6">
+              <AdminQueue
+                onQueueUpdated={() => {
+                  setRefreshTrigger((prev) => prev + 1);
+                }}
+                refreshTrigger={refreshTrigger}
+              />
+            </div>
+          )}
+
+          {currentView === "hud" && (
+            <div className="max-w-7xl mx-auto p-4 sm:p-6">
+              <StageDemoHud
+                onSwitchTab={(tab) => {
+                  if (tab === "learner") setCurrentView("feed");
+                  if (tab === "educator") setCurrentView("verify");
+                  if (tab === "admin") setCurrentView("admin");
+                }}
+                onResetDemo={handleResetDemo}
+                isDriftActive={isDriftActive}
+                onToggleDrift={handleToggleDrift}
+              />
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Upload Simulation Modal */}
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUploadSuccess={handleUploadSuccess}
+        user={user}
+      />
+
+      {/* Supabase Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }
