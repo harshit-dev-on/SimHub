@@ -714,6 +714,26 @@ Test the counter-intuitive 3-door conditional probability problem through single
         questions: [],
       },
     ];
+
+    // Try loading saved user simulations from local data file if running in Node.js
+    try {
+      if (typeof window === "undefined") {
+        const fs = require("fs");
+        const path = require("path");
+        const dataFilePath = path.join(process.cwd(), "data", "user_simulations.json");
+        if (fs.existsSync(dataFilePath)) {
+          const raw = fs.readFileSync(dataFilePath, "utf-8");
+          const userSims = JSON.parse(raw);
+          if (Array.isArray(userSims) && userSims.length > 0) {
+            const idSet = new Set(userSims.map((s: SimulationEntry) => s.id));
+            const defaults = this.simulations.filter((s) => !idSet.has(s.id));
+            this.simulations = [...userSims, ...defaults];
+          }
+        }
+      }
+    } catch {
+      // Ignore in browser or read-only serverless environment
+    }
   }
 
   public getSimulation(id: string): SimulationEntry | undefined {
@@ -857,6 +877,20 @@ Test the counter-intuitive 3-door conditional probability problem through single
       this.userSubscriptions[userId] = [];
     }
     return [...this.userSubscriptions[userId]];
+  }
+
+  public addUserSimulation(sim: SimulationEntry) {
+    sim.isUserUploaded = true;
+    const idx = this.simulations.findIndex((s) => s.id === sim.id);
+    if (idx >= 0) {
+      this.simulations[idx] = sim;
+    } else {
+      this.simulations.unshift(sim);
+    }
+  }
+
+  public removeSimulation(id: string) {
+    this.simulations = this.simulations.filter((s) => s.id !== id);
   }
 
   public toggleUserSubscription(

@@ -151,14 +151,43 @@ export default function Home() {
     }
   };
 
-  // Load simulations catalogue
+  // Load simulations catalogue with localStorage persistence
   const loadData = async () => {
     try {
       const res = await fetch("/api/submissions");
       const data = await res.json();
-      if (data.simulations) {
-        setSimulations(data.simulations);
+      let catalogue: SimulationEntry[] = Array.isArray(data.simulations) ? data.simulations : [];
+
+      // Hydrate user-uploaded simulations from browser localStorage
+      if (typeof window !== "undefined") {
+        try {
+          const storedStr = localStorage.getItem("simhub_user_uploads");
+          if (storedStr) {
+            const userUploads: SimulationEntry[] = JSON.parse(storedStr);
+            if (Array.isArray(userUploads) && userUploads.length > 0) {
+              const userSimIds = new Set(userUploads.map((s) => s.id));
+              const defaults = catalogue.filter((s) => !userSimIds.has(s.id));
+              catalogue = [...userUploads, ...defaults];
+
+              // Background sync to server store if missing
+              const missingOnServer = userUploads.filter(
+                (u) => !(data.simulations || []).some((s: SimulationEntry) => s.id === u.id)
+              );
+              for (const missing of missingOnServer) {
+                fetch("/api/submissions", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(missing),
+                }).catch(() => {});
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to read user uploads from localStorage:", e);
+        }
       }
+
+      setSimulations(catalogue);
     } catch (err) {
       console.error(err);
     }
@@ -183,9 +212,51 @@ export default function Home() {
   };
 
   const handleUploadSuccess = (newSim: SimulationEntry) => {
-    setSimulations((prev) => [newSim, ...prev]);
+    // Persist to browser localStorage immediately
+    if (typeof window !== "undefined") {
+      try {
+        const storedStr = localStorage.getItem("simhub_user_uploads");
+        const list: SimulationEntry[] = storedStr ? JSON.parse(storedStr) : [];
+        const nextList = [newSim, ...list.filter((s) => s.id !== newSim.id)];
+        localStorage.setItem("simhub_user_uploads", JSON.stringify(nextList));
+      } catch (err) {
+        console.warn("Failed to persist simulation to localStorage:", err);
+      }
+    }
+
+    setSimulations((prev) => [newSim, ...prev.filter((s) => s.id !== newSim.id)]);
     setSelectedSim(newSim);
     setCurrentView("watch");
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleDeleteSimulation = async (simId: string) => {
+    // Remove from localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const storedStr = localStorage.getItem("simhub_user_uploads");
+        if (storedStr) {
+          const list: SimulationEntry[] = JSON.parse(storedStr);
+          const nextList = list.filter((s) => s.id !== simId);
+          localStorage.setItem("simhub_user_uploads", JSON.stringify(nextList));
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // Call DELETE API
+    try {
+      await fetch(`/api/submissions?id=${encodeURIComponent(simId)}`, { method: "DELETE" });
+    } catch (e) {
+      console.warn(e);
+    }
+
+    setSimulations((prev) => prev.filter((s) => s.id !== simId));
+    if (selectedSim?.id === simId) {
+      setSelectedSim(null);
+      setCurrentView("feed");
+    }
     setRefreshTrigger((prev) => prev + 1);
   };
 

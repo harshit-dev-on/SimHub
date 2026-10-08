@@ -39,7 +39,9 @@ export const FeedView: React.FC<FeedViewProps> = ({
   onSelectSimulation,
   searchQuery,
 }) => {
-  const approvedSims = simulations.filter((s) => s.status === "approved");
+  const approvedSims = simulations.filter(
+    (s) => s.status === "approved" || s.isUserUploaded || !s.status
+  );
 
   // Filter based on search and topic
   let filtered = approvedSims;
