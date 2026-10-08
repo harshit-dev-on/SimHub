@@ -85,6 +85,7 @@ export interface SimulationEntry {
 class EcoVerseStore {
   public simulations: SimulationEntry[] = [];
   public repoBDriftActive: boolean = false;
+  public userSubscriptions: Record<string, string[]> = {};
 
   constructor() {
     this.resetToDefaults();
@@ -92,6 +93,7 @@ class EcoVerseStore {
 
   public resetToDefaults() {
     this.repoBDriftActive = false;
+    this.userSubscriptions = {};
 
     this.simulations = [
       // 1. Gradient Descent
@@ -815,14 +817,50 @@ class EcoVerseStore {
     this.repoBDriftActive = !this.repoBDriftActive;
     return this.repoBDriftActive;
   }
+
+  public getUserSubscriptions(userId: string): string[] {
+    if (!this.userSubscriptions[userId]) {
+      this.userSubscriptions[userId] = [];
+    }
+    return [...this.userSubscriptions[userId]];
+  }
+
+  public toggleUserSubscription(
+    userId: string,
+    authorName: string
+  ): { isSubscribed: boolean; subscriptions: string[] } {
+    if (!this.userSubscriptions[userId]) {
+      this.userSubscriptions[userId] = [];
+    }
+    const list = this.userSubscriptions[userId];
+    const index = list.indexOf(authorName);
+    let isSubscribed = false;
+    if (index >= 0) {
+      list.splice(index, 1);
+      isSubscribed = false;
+    } else {
+      list.push(authorName);
+      isSubscribed = true;
+    }
+    return { isSubscribed, subscriptions: [...list] };
+  }
+
+  public setUserSubscriptions(userId: string, subscriptions: string[]): string[] {
+    this.userSubscriptions[userId] = Array.isArray(subscriptions) ? [...subscriptions] : [];
+    return [...this.userSubscriptions[userId]];
+  }
 }
 
 const globalForStore = globalThis as unknown as { ecoVerseStore?: EcoVerseStore };
 
 let storeInstance = globalForStore.ecoVerseStore;
-if (!storeInstance || typeof storeInstance.addComment !== "function") {
+if (!storeInstance || typeof storeInstance.getUserSubscriptions !== "function") {
   const existingSims = storeInstance?.simulations;
+  const existingSubs = (storeInstance as any)?.userSubscriptions;
   storeInstance = new EcoVerseStore();
+  if (existingSubs) {
+    storeInstance.userSubscriptions = existingSubs;
+  }
   if (existingSims && existingSims.length > 0) {
     // Preserve existing uploaded simulations while ensuring default sims are present
     const idSet = new Set(existingSims.map((s) => s.id));

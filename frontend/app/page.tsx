@@ -238,6 +238,7 @@ export default function Home() {
               simulations={simulations}
               onSelectSimulation={handleSelectSimulation}
               onGoHome={handleGoHome}
+              user={user}
             />
           )}
 

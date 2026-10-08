@@ -12,11 +12,13 @@ import {
   UserPlus,
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
+import { UserProfile } from "@/lib/supabase";
 
 interface SubscriptionsFeedProps {
   simulations: SimulationEntry[];
   onSelectSimulation: (sim: SimulationEntry) => void;
   onGoHome: () => void;
+  user?: UserProfile | null;
 }
 
 const DEFAULT_SUBSCRIBED_EDUCATORS = [
@@ -28,37 +30,109 @@ const DEFAULT_SUBSCRIBED_EDUCATORS = [
 export const SubscriptionsFeed: React.FC<SubscriptionsFeedProps> = ({
   simulations,
   onSelectSimulation,
+  user,
 }) => {
+  const currentUserId = user?.id || "guest";
+  const storageKey = `simhub_subs_${currentUserId}`;
+
   const [subscribedEducators, setSubscribedEducators] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("simhub_subscribed_educators");
-        if (saved) return JSON.parse(saved);
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const list = JSON.parse(saved);
+          if (Array.isArray(list)) return list;
+        }
       } catch (e) {
         console.error(e);
       }
     }
-    return DEFAULT_SUBSCRIBED_EDUCATORS;
+    return [];
   });
 
   const [selectedEducator, setSelectedEducator] = useState<string>("All");
 
+  // Fetch subscriptions from server and sync with local storage whenever active user changes
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "simhub_subscribed_educators",
-        JSON.stringify(subscribedEducators)
-      );
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const list = JSON.parse(saved);
+          if (Array.isArray(list)) {
+            setSubscribedEducators(list);
+          }
+        } else {
+          setSubscribedEducators([]);
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }, [subscribedEducators]);
 
-  const toggleSubscribe = (authorName: string, e: React.MouseEvent) => {
+    fetch(`/api/users/${encodeURIComponent(currentUserId)}/subscriptions`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.subscriptions)) {
+          setSubscribedEducators(data.subscriptions);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(storageKey, JSON.stringify(data.subscriptions));
+          }
+        }
+      })
+      .catch((err) => console.error("Error fetching user subscriptions:", err));
+  }, [currentUserId, storageKey]);
+
+  const toggleSubscribe = async (authorName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSubscribedEducators((prev) =>
-      prev.includes(authorName)
-        ? prev.filter((name) => name !== authorName)
-        : [...prev, authorName]
-    );
+    const isCurrentlySubbed = subscribedEducators.includes(authorName);
+    const updated = isCurrentlySubbed
+      ? subscribedEducators.filter((name) => name !== authorName)
+      : [...subscribedEducators, authorName];
+
+    setSubscribedEducators(updated);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    }
+
+    try {
+      const res = await fetch(
+        `/api/users/${encodeURIComponent(currentUserId)}/subscriptions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ authorName }),
+        }
+      );
+      const data = await res.json();
+      if (data && Array.isArray(data.subscriptions)) {
+        setSubscribedEducators(data.subscriptions);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(storageKey, JSON.stringify(data.subscriptions));
+        }
+      }
+    } catch (err) {
+      console.error("Error toggling subscription:", err);
+    }
+  };
+
+  const handleSubscribeDefaults = async () => {
+    setSubscribedEducators(DEFAULT_SUBSCRIBED_EDUCATORS);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(storageKey, JSON.stringify(DEFAULT_SUBSCRIBED_EDUCATORS));
+    }
+    try {
+      await fetch(
+        `/api/users/${encodeURIComponent(currentUserId)}/subscriptions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscriptions: DEFAULT_SUBSCRIBED_EDUCATORS }),
+        }
+      );
+    } catch (err) {
+      console.error("Error saving default subscriptions:", err);
+    }
   };
 
   // Extract unique educators from approved simulations
@@ -211,7 +285,7 @@ export const SubscriptionsFeed: React.FC<SubscriptionsFeedProps> = ({
 
             {subscribedEducators.length === 0 && (
               <button
-                onClick={() => setSubscribedEducators(DEFAULT_SUBSCRIBED_EDUCATORS)}
+                onClick={handleSubscribeDefaults}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
               >
                 <UserPlus className="h-4 w-4" />

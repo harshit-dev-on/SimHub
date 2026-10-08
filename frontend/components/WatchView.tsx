@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Share2,
   Flag,
@@ -16,6 +16,7 @@ import {
   ChevronUp,
   ArrowBigUp,
   ArrowBigDown,
+  Bell,
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
 import { PoeModal } from "./PoeModal";
@@ -46,6 +47,100 @@ export const WatchView: React.FC<WatchViewProps> = ({
   const [postScore, setPostScore] = useState<number>(() => {
     return Math.floor((simulation.title.length * 17) % 180) + 24;
   });
+
+  const currentUserId = user?.id || "guest";
+  const storageKey = `simhub_subs_${currentUserId}`;
+
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const list: string[] = JSON.parse(saved);
+          return Array.isArray(list) && list.includes(simulation.authorName);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return Boolean(simulation.isSubscribed);
+  });
+
+  useEffect(() => {
+    let localSubscribed = false;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const list: string[] = JSON.parse(saved);
+          if (Array.isArray(list)) {
+            localSubscribed = list.includes(simulation.authorName);
+            setIsSubscribed(localSubscribed);
+          }
+        } else {
+          setIsSubscribed(Boolean(simulation.isSubscribed));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    fetch(`/api/users/${encodeURIComponent(currentUserId)}/subscriptions`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.subscriptions)) {
+          const isSub = data.subscriptions.includes(simulation.authorName);
+          setIsSubscribed(isSub);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(storageKey, JSON.stringify(data.subscriptions));
+          }
+        }
+      })
+      .catch((err) => console.error("Error fetching user subscriptions:", err));
+  }, [currentUserId, simulation.authorName, storageKey]);
+
+  const handleToggleSubscribe = async () => {
+    const next = !isSubscribed;
+    setIsSubscribed(next);
+
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        let list: string[] = saved ? JSON.parse(saved) : [];
+        if (!Array.isArray(list)) list = [];
+        if (next) {
+          if (!list.includes(simulation.authorName)) {
+            list = [...list, simulation.authorName];
+          }
+        } else {
+          list = list.filter((name) => name !== simulation.authorName);
+        }
+        localStorage.setItem(storageKey, JSON.stringify(list));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    try {
+      const res = await fetch(
+        `/api/users/${encodeURIComponent(currentUserId)}/subscriptions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ authorName: simulation.authorName }),
+        }
+      );
+      const data = await res.json();
+      if (data && Array.isArray(data.subscriptions)) {
+        setIsSubscribed(data.subscriptions.includes(simulation.authorName));
+        if (typeof window !== "undefined") {
+          localStorage.setItem(storageKey, JSON.stringify(data.subscriptions));
+        }
+      }
+    } catch (err) {
+      console.error("Error toggling subscription:", err);
+    }
+  };
 
   const handlePostVote = (dir: "up" | "down") => {
     const currentVote = postVote;
@@ -134,13 +229,27 @@ export const WatchView: React.FC<WatchViewProps> = ({
                 alt={simulation.authorName}
                 className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-200 shadow-2xs"
               />
-              <div>
+              <div className="mr-2">
                 <div className="flex items-center gap-1">
                   <span className="font-bold text-sm text-slate-900">{simulation.authorName}</span>
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                 </div>
                 <div className="text-xs text-slate-500 font-medium">Verified Contributor</div>
               </div>
+
+              {/* Functional Subscribe Button */}
+              <button
+                onClick={handleToggleSubscribe}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                  isSubscribed
+                    ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300"
+                    : "bg-slate-900 hover:bg-slate-800 text-white"
+                }`}
+                title={isSubscribed ? "Unsubscribe from this educator" : "Subscribe to this educator"}
+              >
+                <Bell className={`h-3.5 w-3.5 ${isSubscribed ? "fill-slate-700 text-slate-700" : ""}`} />
+                <span>{isSubscribed ? "Subscribed" : "Subscribe"}</span>
+              </button>
             </div>
 
             {/* Video Action Buttons with Reddit Vote Pill */}
