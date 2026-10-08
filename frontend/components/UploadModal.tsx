@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
 import { UserProfile } from "@/lib/supabase";
+import { MarkdownEditor } from "./MarkdownEditor";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -198,18 +199,21 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             />
           </div>
 
-          {/* Description */}
+          {/* Description with Markdown / README.md Editor */}
           <div>
-            <label className="text-slate-300 block mb-1 font-semibold">
-              Description &amp; Scientific Concept <span className="text-rose-400">*</span>
-            </label>
-            <textarea
-              required
-              rows={3}
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-slate-300 font-semibold text-xs sm:text-sm">
+                Description &amp; Scientific Concept <span className="text-rose-400">*</span>
+              </label>
+              <span className="text-[11px] text-cyan-400 font-mono">
+                Supports README.md format
+              </span>
+            </div>
+            <MarkdownEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Explain the simulation's underlying physical or ecological model, key variables, and intended learning takeaways..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+              onChange={setDescription}
+              placeholder={`# Overview\nExplain the simulation's underlying physical or ecological model, key variables, and learning goals.\n\n### Key Equations\n\`f(x) = x^2\`\n\n- Parameter ranges\n- Observed convergence`}
+              minRows={5}
             />
           </div>
 

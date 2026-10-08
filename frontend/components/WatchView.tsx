@@ -12,15 +12,16 @@ import {
   Globe,
   Award,
   Eye,
-  ChevronDown,
-  ChevronUp,
   ArrowBigUp,
   ArrowBigDown,
   Bell,
+  FileText,
+  ShieldCheck,
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
 import { PoeModal } from "./PoeModal";
 import { RedditCommentsSection } from "./RedditCommentsSection";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface WatchViewProps {
   simulation: SimulationEntry;
@@ -38,7 +39,6 @@ export const WatchView: React.FC<WatchViewProps> = ({
   user,
 }) => {
   const [showPoeModal, setShowPoeModal] = useState(false);
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const [iframeKey, setIframeKey] = useState(0);
   const [hasReported, setHasReported] = useState(false);
@@ -173,10 +173,6 @@ export const WatchView: React.FC<WatchViewProps> = ({
       console.error(err);
     }
   };
-
-  const relatedSims = allSimulations.filter(
-    (s) => s.id !== simulation.id && s.status === "approved"
-  );
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 w-full text-slate-900">
@@ -351,70 +347,6 @@ export const WatchView: React.FC<WatchViewProps> = ({
             </div>
           </div>
 
-          {/* Expandable Description Box */}
-          <div
-            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-            className="rounded-2xl bg-white border border-slate-200 p-4 sm:p-5 text-xs space-y-3 cursor-pointer hover:border-amber-300 transition-colors shadow-xs"
-          >
-            <div className="flex flex-wrap items-center gap-3 font-semibold text-slate-600">
-              <span>{simulation.views}</span>
-              <span>•</span>
-              <span>{simulation.uploadedAt}</span>
-              <span className="rounded-md bg-[#FEF9C3] px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-[#FDE68A]">
-                License: {simulation.license}
-              </span>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                6/6 Hard Gates Passed
-              </span>
-            </div>
-
-            <p className={`text-slate-700 leading-relaxed ${isDescriptionExpanded ? "" : "line-clamp-2"}`}>
-              {simulation.description}
-            </p>
-
-            {/* Links and Security Details */}
-            {isDescriptionExpanded && (
-              <div className="pt-3 border-t border-slate-100 space-y-2 text-slate-600">
-                <div className="flex items-center gap-2">
-                  <GitBranch className="h-3.5 w-3.5 text-indigo-500" />
-                  <span>GitHub Repository:</span>
-                  <a
-                    href={simulation.repoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-indigo-600 underline font-mono truncate"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {simulation.repoUrl}
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Globe className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Published Origin:</span>
-                  <a
-                    href={simulation.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-emerald-600 underline font-mono truncate"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {simulation.liveUrl}
-                  </a>
-                </div>
-
-                <div className="pt-2 text-[11px] text-slate-400">
-                  Author numeric GitHub ID: #{simulation.authorNumericId} • Bound challenge token verified • Static tracker scanner clean.
-                </div>
-              </div>
-            )}
-
-            <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
-              <span>{isDescriptionExpanded ? "Show less" : "...more"}</span>
-              {isDescriptionExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </div>
-          </div>
-
           {/* Reddit-Style Comment & Upvote/Downvote System */}
           <RedditCommentsSection
             simulationId={simulation.id}
@@ -428,42 +360,118 @@ export const WatchView: React.FC<WatchViewProps> = ({
           />
         </div>
 
-        {/* Right 4 Cols: Recommended Simulations */}
-        <div className="lg:col-span-4 space-y-3">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Up Next &amp; Recommended
-          </h3>
-
-          <div className="space-y-3">
-            {relatedSims.map((sim) => (
-              <div
-                key={sim.id}
-                onClick={() => onSelectSimulation(sim)}
-                className="flex gap-2.5 cursor-pointer group rounded-2xl p-2.5 bg-white border border-slate-200 hover:border-amber-400 hover:shadow-xs transition-all"
-              >
-                {/* Compact Thumbnail */}
-                <div className="relative aspect-video w-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-                  <img
-                    src={sim.thumbnailUrl || (sim.screenshots && sim.screenshots[0])}
-                    alt={sim.title}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform"
-                  />
+        {/* Right 4 Cols: Dedicated Description & Technical Details Sidebar */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5 lg:sticky lg:top-4">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#FEF9C3] text-amber-900 border border-[#FDE68A] shadow-2xs">
+                  <FileText className="h-4.5 w-4.5" />
                 </div>
-
-                {/* Meta */}
-                <div className="flex-1 min-w-0 text-xs">
-                  <h4 className="font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-amber-800 transition-colors">
-                    {sim.title}
-                  </h4>
-                  <div className="mt-1 text-[11px] text-slate-500 truncate">
-                    {sim.authorName}
-                  </div>
-                  <div className="text-[10px] text-slate-400">
-                    {sim.views} • {sim.uploadedAt}
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Description
+                  </h3>
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    Simulation Overview
                   </div>
                 </div>
               </div>
-            ))}
+              <span className="text-[11px] font-bold bg-[#FEF9C3] text-amber-950 px-2.5 py-1 rounded-full border border-[#FDE68A]">
+                {simulation.topic}
+              </span>
+            </div>
+
+            {/* Quick Badges Row */}
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                6/6 Hard Gates Passed
+              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700 border border-slate-200">
+                {simulation.gradeLevel || "Advanced STEM"}
+              </span>
+            </div>
+
+            {/* Description Text (Rendered as GitHub README.md) */}
+            <div className="space-y-2">
+              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <span>About this Simulation</span>
+                <span className="font-mono text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                  README.md
+                </span>
+              </h4>
+              <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
+                <MarkdownRenderer content={simulation.description} />
+              </div>
+            </div>
+
+            {/* Key Telemetry Stats */}
+            <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
+              <div className="p-3 rounded-2xl bg-[#EBF0F5]/60 border border-slate-200/80">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Views
+                </div>
+                <div className="font-black text-slate-900 text-sm mt-0.5">
+                  {simulation.views}
+                </div>
+              </div>
+              <div className="p-3 rounded-2xl bg-[#EBF0F5]/60 border border-slate-200/80">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Published
+                </div>
+                <div className="font-black text-slate-900 text-sm mt-0.5">
+                  {simulation.uploadedAt}
+                </div>
+              </div>
+            </div>
+
+            {/* Source & Provenance Details */}
+            <div className="pt-3 border-t border-slate-100 space-y-2.5 text-xs text-slate-600">
+              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Source & Verification
+              </h4>
+
+              <div className="flex items-center gap-2">
+                <GitBranch className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
+                <span className="text-slate-500 text-[11px]">Repository:</span>
+                <a
+                  href={simulation.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:text-indigo-800 underline font-mono text-[11px] truncate flex-1"
+                >
+                  {simulation.repoUrl.replace("https://github.com/", "")}
+                </a>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Globe className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span className="text-slate-500 text-[11px]">Origin:</span>
+                <a
+                  href={simulation.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 hover:text-emerald-800 underline font-mono text-[11px] truncate flex-1"
+                >
+                  {simulation.liveUrl}
+                </a>
+              </div>
+
+              <div className="flex items-center justify-between pt-1.5 text-[11px] text-slate-500 border-t border-slate-100">
+                <span>
+                  License: <strong className="text-slate-800">{simulation.license}</strong>
+                </span>
+                <span>
+                  GitHub ID: <strong className="text-slate-800">#{simulation.authorNumericId}</strong>
+                </span>
+              </div>
+
+              <div className="pt-1 text-[10px] text-slate-400 leading-normal">
+                Bound challenge token verified • Static tracker scanner clean.
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -100,8 +100,28 @@ class EcoVerseStore {
       {
         id: "sim-gradient-descent",
         title: "Gradient Descent",
-        description:
-          "Explore 2D and 3D loss surfaces, non-convex double wells, learning rates (η), and momentum dynamics with step-by-step convergence telemetry.",
+        description: `# Gradient Descent & Optimization
+Interactive laboratory exploring non-convex loss surfaces, learning rate sensitivity, and momentum dynamics.
+
+### Core Mathematical Model
+The parameter update equation with Polyak Heavy-Ball momentum:
+
+\`\`\`python
+# Velocity update with momentum damping
+v = beta * v + lr * grad_loss(w)
+w = w - v
+\`\`\`
+
+### Key Parameters & Regimes
+| Parameter | Symbol | Range | Dynamic Effect |
+|---|---|---|---|
+| Learning Rate | \`η\` | \`0.001 – 0.5\` | Step magnitude & divergence threshold |
+| Momentum | \`β\` | \`0.0 – 0.99\` | Damps oscillations in steep ravines |
+
+### Learning Objectives
+- [x] Observe oscillatory overshoot in ill-conditioned quadratic valleys
+- [x] Compare vanilla SGD vs Polyak momentum trajectories
+- [ ] Find the global minimum of the double-well surface`,
         topic: "Machine Learning & Optimization",
         gradeLevel: "College / Advanced STEM",
         repoUrl: "https://github.com/simhub-stem/gradient-descent-lab",
@@ -209,8 +229,22 @@ class EcoVerseStore {
       {
         id: "sim-monty-hall",
         title: "Monty Hall Problem",
-        description:
-          "Test the famous 3-door probability paradox through interactive single-play reveals and high-speed Monte Carlo batch simulations (N = 10,000).",
+        description: `# Monty Hall Probability Paradox
+Test the counter-intuitive 3-door conditional probability problem through single-play reveals and high-speed Monte Carlo batch simulations.
+
+### Theoretical Breakdown
+> "Always switching yields a **2/3** win probability, while staying remains capped at **1/3**."
+
+### Strategy Comparison
+| Strategy | Expected Win Rate | Bayes Formulation |
+|---|---|---|
+| Stay | **33.3%** (1/3) | \`P(Car \| Door 1) = 1/3\` |
+| Switch | **66.7%** (2/3) | \`P(Car \| Switch) = 2/3\` |
+
+### Verification Steps
+- [x] Run single trial with door choice
+- [x] Host opens a goat door
+- [ ] Execute N = 10,000 Monte Carlo test to verify convergence`,
         topic: "Probability & Game Theory",
         gradeLevel: "High School / College",
         repoUrl: "https://github.com/simhub-stem/monty-hall-paradox",
@@ -854,18 +888,24 @@ class EcoVerseStore {
 const globalForStore = globalThis as unknown as { ecoVerseStore?: EcoVerseStore };
 
 let storeInstance = globalForStore.ecoVerseStore;
-if (!storeInstance || typeof storeInstance.getUserSubscriptions !== "function") {
+if (
+  !storeInstance ||
+  typeof storeInstance.getUserSubscriptions !== "function" ||
+  !(storeInstance as any)._hasMarkdownDesc
+) {
   const existingSims = storeInstance?.simulations;
   const existingSubs = (storeInstance as any)?.userSubscriptions;
   storeInstance = new EcoVerseStore();
+  (storeInstance as any)._hasMarkdownDesc = true;
   if (existingSubs) {
     storeInstance.userSubscriptions = existingSubs;
   }
   if (existingSims && existingSims.length > 0) {
-    // Preserve existing uploaded simulations while ensuring default sims are present
-    const idSet = new Set(existingSims.map((s) => s.id));
-    const newDefaults = storeInstance.simulations.filter((s) => !idSet.has(s.id));
-    storeInstance.simulations = [...existingSims, ...newDefaults];
+    // Preserve user-uploaded simulations while using updated default simulations
+    const userUploaded = existingSims.filter((s) => s.isUserUploaded);
+    const idSet = new Set(userUploaded.map((s) => s.id));
+    const defaults = storeInstance.simulations.filter((s) => !idSet.has(s.id));
+    storeInstance.simulations = [...userUploaded, ...defaults];
   }
 }
 
