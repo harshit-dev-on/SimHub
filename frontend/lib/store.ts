@@ -29,7 +29,13 @@ export interface SimulationComment {
   text: string;
   timestamp: string;
   likes: number;
+  score?: number;
+  upvotes?: number;
+  downvotes?: number;
+  userVote?: "up" | "down" | null;
   hasMindChangedBadge?: boolean;
+  isCreator?: boolean;
+  replies?: SimulationComment[];
 }
 
 export interface SimulationEntry {
@@ -134,10 +140,65 @@ class EcoVerseStore {
             id: "c-gd-1",
             authorName: "Maya Lin",
             authorAvatar: "https://api.dicebear.com/7.x/lorelei/svg?seed=MayaGreen",
-            text: "The real-time contour loss curves helped me visualize momentum term damping!",
+            text: "The real-time contour loss curves helped me visualize momentum term damping! When η is too large, you can literally see it leap out of the convex well.",
             timestamp: "3 hours ago",
-            likes: 28,
+            likes: 34,
+            score: 34,
+            upvotes: 36,
+            downvotes: 2,
             hasMindChangedBadge: true,
+            replies: [
+              {
+                id: "c-gd-1-r1",
+                authorName: "Dr. Aris Thorne",
+                authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+                text: "Exactly right Maya! If you try setting learning rate to 0.45 in the POE loop, the eigenvalues of the Hessian trigger immediate divergence.",
+                timestamp: "2 hours ago",
+                likes: 19,
+                score: 19,
+                upvotes: 20,
+                downvotes: 1,
+                isCreator: true,
+                replies: [
+                  {
+                    id: "c-gd-1-r1-1",
+                    authorName: "Alex Chen",
+                    authorAvatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AlexBot",
+                    text: "Just verified this in the slider, oscillation amplitude doubled every 2 steps!",
+                    timestamp: "45 minutes ago",
+                    likes: 7,
+                    score: 7,
+                    upvotes: 7,
+                    downvotes: 0,
+                    hasMindChangedBadge: false,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "c-gd-2",
+            authorName: "Liam O'Connor",
+            authorAvatar: "https://api.dicebear.com/7.x/micah/svg?seed=LiamIrish",
+            text: "Can someone explain why momentum β=0.9 prevents getting stuck in saddle points?",
+            timestamp: "1 hour ago",
+            likes: 12,
+            score: 12,
+            upvotes: 14,
+            downvotes: 2,
+            replies: [
+              {
+                id: "c-gd-2-r1",
+                authorName: "Devin K.",
+                authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=DevinTech",
+                text: "Because the accumulated velocity carries kinetic inertia past regions where the gradient ∇f ≈ 0.",
+                timestamp: "25 minutes ago",
+                likes: 15,
+                score: 15,
+                upvotes: 15,
+                downvotes: 0,
+              },
+            ],
           },
         ],
       },
@@ -188,10 +249,27 @@ class EcoVerseStore {
             id: "c-mh-1",
             authorName: "Rohan V.",
             authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=RohanEarth",
-            text: "Ran 10,000 iterations: switching won 66.8% of the time. Mind completely blown!",
+            text: "Ran 10,000 iterations: switching won 66.8% of the time. Mind completely blown! I always thought it was 50/50.",
             timestamp: "5 hours ago",
-            likes: 45,
+            likes: 58,
+            score: 58,
+            upvotes: 61,
+            downvotes: 3,
             hasMindChangedBadge: true,
+            replies: [
+              {
+                id: "c-mh-1-r1",
+                authorName: "Priya Sharma",
+                authorAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+                text: "That initial 50/50 instinct is the classic cognitive trap! Monty is filtering out bad information on your behalf.",
+                timestamp: "4 hours ago",
+                likes: 42,
+                score: 42,
+                upvotes: 42,
+                downvotes: 0,
+                isCreator: true,
+              },
+            ],
           },
         ],
       },
@@ -606,6 +684,133 @@ class EcoVerseStore {
     return this.simulations.find((s) => s.id === id);
   }
 
+  public addComment(
+    simId: string,
+    commentData: {
+      text: string;
+      authorName: string;
+      authorAvatar: string;
+      isCreator?: boolean;
+      hasMindChangedBadge?: boolean;
+      parentId?: string;
+    }
+  ): SimulationComment | null {
+    const sim = this.getSimulation(simId);
+    if (!sim) return null;
+
+    if (!sim.comments) sim.comments = [];
+
+    const newComment: SimulationComment = {
+      id: `c-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      authorName: commentData.authorName,
+      authorAvatar: commentData.authorAvatar,
+      text: commentData.text,
+      timestamp: "Just now",
+      likes: 1,
+      score: 1,
+      upvotes: 1,
+      downvotes: 0,
+      userVote: "up",
+      isCreator: commentData.isCreator || false,
+      hasMindChangedBadge: commentData.hasMindChangedBadge || false,
+      replies: [],
+    };
+
+    if (commentData.parentId) {
+      const addReplyRecursive = (list: SimulationComment[]): boolean => {
+        for (const item of list) {
+          if (item.id === commentData.parentId) {
+            if (!item.replies) item.replies = [];
+            item.replies.unshift(newComment);
+            return true;
+          }
+          if (item.replies && item.replies.length > 0) {
+            if (addReplyRecursive(item.replies)) return true;
+          }
+        }
+        return false;
+      };
+
+      const added = addReplyRecursive(sim.comments);
+      if (!added) {
+        sim.comments.unshift(newComment);
+      }
+    } else {
+      sim.comments.unshift(newComment);
+    }
+
+    return newComment;
+  }
+
+  public voteComment(
+    simId: string,
+    commentId: string,
+    direction: "up" | "down",
+    currentVote?: "up" | "down" | null
+  ): { score: number; userVote: "up" | "down" | null } | null {
+    const sim = this.getSimulation(simId);
+    if (!sim || !sim.comments) return null;
+
+    let result: { score: number; userVote: "up" | "down" | null } | null = null;
+
+    const voteRecursive = (list: SimulationComment[]): boolean => {
+      for (const c of list) {
+        if (c.id === commentId) {
+          let newVote: "up" | "down" | null = direction;
+          let delta = 0;
+
+          if (currentVote === direction) {
+            newVote = null;
+            delta = direction === "up" ? -1 : 1;
+          } else if (!currentVote) {
+            delta = direction === "up" ? 1 : -1;
+          } else {
+            delta = direction === "up" ? 2 : -2;
+          }
+
+          c.score = (c.score ?? c.likes ?? 0) + delta;
+          c.likes = Math.max(0, c.score);
+          c.userVote = newVote;
+
+          result = { score: c.score, userVote: newVote };
+          return true;
+        }
+
+        if (c.replies && c.replies.length > 0) {
+          if (voteRecursive(c.replies)) return true;
+        }
+      }
+      return false;
+    };
+
+    voteRecursive(sim.comments);
+    return result;
+  }
+
+  public voteSimulation(
+    simId: string,
+    direction: "up" | "down",
+    currentVote?: "up" | "down" | null
+  ): { likes: number; userVote: "up" | "down" | null } | null {
+    const sim = this.getSimulation(simId);
+    if (!sim) return null;
+
+    let newVote: "up" | "down" | null = direction;
+    let delta = 0;
+
+    if (currentVote === direction) {
+      newVote = null;
+      delta = direction === "up" ? -1 : 1;
+    } else if (!currentVote) {
+      delta = direction === "up" ? 1 : -1;
+    } else {
+      delta = direction === "up" ? 2 : -2;
+    }
+
+    sim.likes = Math.max(0, (sim.likes ?? 0) + delta);
+    return { likes: sim.likes, userVote: newVote };
+  }
+
   public toggleRepoBDrift(): boolean {
     this.repoBDriftActive = !this.repoBDriftActive;
     return this.repoBDriftActive;
@@ -614,7 +819,19 @@ class EcoVerseStore {
 
 const globalForStore = globalThis as unknown as { ecoVerseStore?: EcoVerseStore };
 
-export const store = globalForStore.ecoVerseStore ?? new EcoVerseStore();
+let storeInstance = globalForStore.ecoVerseStore;
+if (!storeInstance || typeof storeInstance.addComment !== "function") {
+  const existingSims = storeInstance?.simulations;
+  storeInstance = new EcoVerseStore();
+  if (existingSims && existingSims.length > 0) {
+    // Preserve existing uploaded simulations while ensuring default sims are present
+    const idSet = new Set(existingSims.map((s) => s.id));
+    const newDefaults = storeInstance.simulations.filter((s) => !idSet.has(s.id));
+    storeInstance.simulations = [...existingSims, ...newDefaults];
+  }
+}
+
+export const store = storeInstance;
 
 if (process.env.NODE_ENV !== "production") {
   globalForStore.ecoVerseStore = store;

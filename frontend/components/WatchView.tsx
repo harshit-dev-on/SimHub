@@ -14,9 +14,12 @@ import {
   Eye,
   ChevronDown,
   ChevronUp,
+  ArrowBigUp,
+  ArrowBigDown,
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
 import { PoeModal } from "./PoeModal";
+import { RedditCommentsSection } from "./RedditCommentsSection";
 
 interface WatchViewProps {
   simulation: SimulationEntry;
@@ -36,11 +39,34 @@ export const WatchView: React.FC<WatchViewProps> = ({
   const [showPoeModal, setShowPoeModal] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-  const [comments, setComments] = useState(simulation.comments || []);
-  const [newCommentText, setNewCommentText] = useState("");
   const [iframeKey, setIframeKey] = useState(0);
-
   const [hasReported, setHasReported] = useState(false);
+
+  const [postVote, setPostVote] = useState<"up" | "down" | null>(null);
+  const [postScore, setPostScore] = useState<number>(() => {
+    return Math.floor((simulation.title.length * 17) % 180) + 24;
+  });
+
+  const handlePostVote = (dir: "up" | "down") => {
+    const currentVote = postVote;
+    if (postVote === dir) {
+      setPostVote(null);
+      setPostScore((s) => (dir === "up" ? s - 1 : s + 1));
+    } else if (postVote === null) {
+      setPostVote(dir);
+      setPostScore((s) => (dir === "up" ? s + 1 : s - 1));
+    } else {
+      setPostVote(dir);
+      setPostScore((s) => (dir === "up" ? s + 2 : s - 2));
+    }
+
+    // Sync simulation vote to server
+    fetch(`/api/simulations/${simulation.id}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ direction: dir, currentVote }),
+    }).catch((err) => console.error("Failed to sync post vote to server:", err));
+  };
 
   const handleReport = async () => {
     try {
@@ -51,26 +77,6 @@ export const WatchView: React.FC<WatchViewProps> = ({
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCommentText.trim()) return;
-
-    const newComment = {
-      id: `c-${Date.now()}`,
-      authorName: user ? user.name : "Anonymous Learner",
-      authorAvatar: user
-        ? user.avatarUrl
-        : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-      text: newCommentText.trim(),
-      timestamp: "Just now",
-      likes: 0,
-      hasMindChangedBadge: typeof window !== "undefined" && localStorage.getItem("ecoverse_badge_mind_changed") === "true",
-    };
-
-    setComments([newComment, ...comments]);
-    setNewCommentText("");
   };
 
   const relatedSims = allSimulations.filter(
@@ -137,8 +143,45 @@ export const WatchView: React.FC<WatchViewProps> = ({
               </div>
             </div>
 
-            {/* Video Action Buttons */}
+            {/* Video Action Buttons with Reddit Vote Pill */}
             <div className="flex flex-wrap items-center gap-2">
+              {/* Reddit Style Post Upvote/Downvote Pill */}
+              <div className="flex items-center rounded-full bg-white border border-slate-200 p-0.5 shadow-2xs">
+                <button
+                  onClick={() => handlePostVote("up")}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                    postVote === "up"
+                      ? "text-orange-600 bg-orange-100"
+                      : "text-slate-400 hover:text-orange-600 hover:bg-slate-100"
+                  }`}
+                  title="Upvote simulation"
+                >
+                  <ArrowBigUp className={`h-4.5 w-4.5 ${postVote === "up" ? "fill-orange-600 stroke-orange-600" : ""}`} />
+                </button>
+                <span
+                  className={`px-1.5 text-xs font-bold leading-none select-none ${
+                    postVote === "up"
+                      ? "text-orange-600"
+                      : postVote === "down"
+                      ? "text-indigo-600"
+                      : "text-slate-700"
+                  }`}
+                >
+                  {postScore > 0 ? `+${postScore}` : postScore}
+                </span>
+                <button
+                  onClick={() => handlePostVote("down")}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                    postVote === "down"
+                      ? "text-indigo-600 bg-indigo-100"
+                      : "text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
+                  }`}
+                  title="Downvote simulation"
+                >
+                  <ArrowBigDown className={`h-4.5 w-4.5 ${postVote === "down" ? "fill-indigo-600 stroke-indigo-600" : ""}`} />
+                </button>
+              </div>
+
               {/* Enter POE Learning Loop Button */}
               <button
                 onClick={() => setShowPoeModal(true)}
@@ -263,68 +306,17 @@ export const WatchView: React.FC<WatchViewProps> = ({
             </div>
           </div>
 
-          {/* Comments Section */}
-          <div className="rounded-2xl bg-white border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs">
-            <h3 className="text-sm font-bold text-slate-900">
-              Learner Discussion ({comments.length})
-            </h3>
-
-            {/* Add Comment Input */}
-            <form onSubmit={handleAddComment} className="flex gap-3 items-start">
-              <img
-                src={
-                  user
-                    ? user.avatarUrl
-                    : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
-                }
-                alt="You"
-                className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200 shrink-0 mt-1"
-              />
-              <div className="flex-1 space-y-2">
-                <input
-                  type="text"
-                  value={newCommentText}
-                  onChange={(e) => setNewCommentText(e.target.value)}
-                  placeholder="Share your observation or conceptual takeaway..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:border-amber-400 focus:outline-none"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="submit"
-                    className="rounded-full bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-1.5 text-xs shadow-xs cursor-pointer"
-                  >
-                    Comment
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            {/* Comments List */}
-            <div className="space-y-4 pt-2">
-              {comments.map((c) => (
-                <div key={c.id} className="flex gap-3 items-start text-xs border-t border-slate-100 pt-3">
-                  <img
-                    src={c.authorAvatar}
-                    alt={c.authorName}
-                    className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200 shrink-0"
-                  />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900">{c.authorName}</span>
-                      <span className="text-[10px] text-slate-400">{c.timestamp}</span>
-                      {c.hasMindChangedBadge && (
-                        <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-800 border border-[#FDE68A]">
-                          <Award className="h-2.5 w-2.5 text-amber-600" />
-                          <span>Mind Changed</span>
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-slate-700 leading-relaxed">{c.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Reddit-Style Comment & Upvote/Downvote System */}
+          <RedditCommentsSection
+            simulationId={simulation.id}
+            initialComments={simulation.comments || []}
+            simulationTitle={simulation.title}
+            creatorName={simulation.authorName}
+            user={user}
+            onCommentsChange={(updated) => {
+              simulation.comments = updated;
+            }}
+          />
         </div>
 
         {/* Right 4 Cols: Recommended Simulations */}
