@@ -217,7 +217,13 @@ export const SimulationWorkbench: React.FC<SimulationWorkbenchProps> = ({
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:underline font-mono truncate"
                 >
-                  {new URL(simulation.liveUrl).hostname}
+                  {(() => {
+                    try {
+                      return new URL(simulation.liveUrl).hostname;
+                    } catch {
+                      return simulation.liveUrl;
+                    }
+                  })()}
                 </a>
               </div>
             </div>

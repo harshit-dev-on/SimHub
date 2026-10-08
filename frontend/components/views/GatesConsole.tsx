@@ -17,7 +17,12 @@ export type EducatorConsoleProps = GatesConsoleProps;
 
 export const GatesConsole: React.FC<GatesConsoleProps> = ({ onSubmissionSuccess }) => {
   const [repoUrl, setRepoUrl] = useState("https://github.com/ecoteacher/carbon-bathtub");
-  const [liveUrl, setLiveUrl] = useState("http://localhost:3000/api/mock-sim/repo-b/");
+  const [liveUrl, setLiveUrl] = useState(() => {
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}/api/mock-sim/repo-b/`;
+    }
+    return "http://localhost:3000/api/mock-sim/repo-b/";
+  });
   const [title, setTitle] = useState("Carbon Bathtub: CO₂ Stock & Flow Model");
   const [license, setLicense] = useState("MIT");
   const [topic, setTopic] = useState("Carbon Cycle");
@@ -42,7 +47,8 @@ export const GatesConsole: React.FC<GatesConsoleProps> = ({ onSubmissionSuccess 
 
   const handleLoadRepoB = () => {
     setRepoUrl("https://github.com/ecoteacher/carbon-bathtub");
-    setLiveUrl("http://localhost:3000/api/mock-sim/repo-b/");
+    const dynOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+    setLiveUrl(`${dynOrigin}/api/mock-sim/repo-b/`);
     setTitle("Carbon Bathtub: CO₂ Stock & Flow Model");
     setLicense("MIT");
     setTopic("Carbon Cycle");
