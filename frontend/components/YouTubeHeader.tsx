@@ -28,6 +28,7 @@ interface YouTubeHeaderProps {
   onGoHome: () => void;
   onOpenHud: () => void;
   onResetDemo: () => void;
+  onOpenProfileSetup: () => void;
 }
 
 export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
@@ -41,6 +42,7 @@ export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
   onGoHome,
   onOpenHud,
   onResetDemo,
+  onOpenProfileSetup,
 }) => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
@@ -155,6 +157,17 @@ export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
                 </div>
 
                 <div className="py-1">
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      onOpenProfileSetup();
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-cyan-300 hover:bg-slate-800 hover:text-white font-medium"
+                  >
+                    <Sparkles className="h-4 w-4 text-cyan-400" />
+                    <span>Customize Channel &amp; Avatar</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       setProfileDropdownOpen(false);

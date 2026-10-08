@@ -7,6 +7,7 @@ import { YouTubeFeed } from "@/components/YouTubeFeed";
 import { WatchView } from "@/components/WatchView";
 import { UploadModal } from "@/components/UploadModal";
 import { AuthModal } from "@/components/AuthModal";
+import { ProfileSetupModal } from "@/components/ProfileSetupModal";
 import { EducatorConsole } from "@/components/EducatorConsole";
 import { AdminQueue } from "@/components/AdminQueue";
 import { StageDemoHud } from "@/components/StageDemoHud";
@@ -33,6 +34,8 @@ export default function Home() {
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isProfileSetupOpen, setIsProfileSetupOpen] = useState(false);
+  const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [currentView, setCurrentView] = useState<"feed" | "watch" | "verify" | "admin" | "hud">("feed");
@@ -69,10 +72,20 @@ export default function Home() {
             const profile = mapSupabaseUserToProfile(data.session.user);
             setUser(profile);
             localStorage.setItem("simhub_user", JSON.stringify(profile));
-            // Clean the URL query params without full page reload
+            const hasCustomized = localStorage.getItem("simhub_profile_customized");
+            if (!hasCustomized) {
+              setIsFirstTimeSetup(true);
+              setIsProfileSetupOpen(true);
+            }
             window.history.replaceState({}, document.title, window.location.pathname);
           }
         });
+      }
+
+      // Check if arriving with firstTime param
+      if (urlParams.get("firstTime") === "true") {
+        setIsFirstTimeSetup(true);
+        setIsProfileSetupOpen(true);
       }
     }
 
@@ -112,6 +125,11 @@ export default function Home() {
     setUser(loggedInUser);
     if (typeof window !== "undefined") {
       localStorage.setItem("simhub_user", JSON.stringify(loggedInUser));
+      const hasCustomized = localStorage.getItem("simhub_profile_customized");
+      if (!hasCustomized) {
+        setIsFirstTimeSetup(true);
+        setIsProfileSetupOpen(true);
+      }
     }
   };
 
@@ -210,6 +228,10 @@ export default function Home() {
         onGoHome={handleGoHome}
         onOpenHud={() => setCurrentView("hud")}
         onResetDemo={handleResetDemo}
+        onOpenProfileSetup={() => {
+          setIsFirstTimeSetup(false);
+          setIsProfileSetupOpen(true);
+        }}
       />
 
       {/* Main Body: Sidebar + Dynamic Content View */}
@@ -304,6 +326,17 @@ export default function Home() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* First-time & Custom Profile/Avatar Modal */}
+      <ProfileSetupModal
+        isOpen={isProfileSetupOpen}
+        onClose={() => setIsProfileSetupOpen(false)}
+        user={user}
+        onSaveProfile={(updatedProfile) => {
+          setUser(updatedProfile);
+        }}
+        isFirstTime={isFirstTimeSetup}
       />
     </div>
   );

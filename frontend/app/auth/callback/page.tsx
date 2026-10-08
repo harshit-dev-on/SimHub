@@ -38,8 +38,11 @@ function AuthCallbackHandler() {
 
           if (data?.session?.user) {
             const profile = mapSupabaseUserToProfile(data.session.user);
+            let targetUrl = "/";
             if (typeof window !== "undefined") {
               localStorage.setItem("simhub_user", JSON.stringify(profile));
+              const hasCustomized = localStorage.getItem("simhub_profile_customized");
+              targetUrl = hasCustomized ? "/" : "/?firstTime=true";
             }
 
             if (isMounted) {
@@ -48,7 +51,7 @@ function AuthCallbackHandler() {
             }
 
             setTimeout(() => {
-              window.location.href = "/";
+              window.location.href = targetUrl;
             }, 600);
             return;
           }
@@ -94,10 +97,13 @@ function AuthCallbackHandler() {
 
   const handleContinueAsDemo = () => {
     const demoUser = DEMO_USERS[0];
+    let target = "/";
     if (typeof window !== "undefined") {
       localStorage.setItem("simhub_user", JSON.stringify(demoUser));
+      const hasCustomized = localStorage.getItem("simhub_profile_customized");
+      target = hasCustomized ? "/" : "/?firstTime=true";
     }
-    window.location.href = "/";
+    window.location.href = target;
   };
 
   return (
