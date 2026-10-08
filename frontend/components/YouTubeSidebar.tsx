@@ -17,6 +17,8 @@ import {
   Users,
 } from "lucide-react";
 
+import { UserProfile } from "@/lib/supabase";
+
 interface YouTubeSidebarProps {
   isOpen: boolean;
   activeTopic: string;
@@ -28,6 +30,7 @@ interface YouTubeSidebarProps {
   onOpenEducatorVerify: () => void;
   hasMindChangedBadge: boolean;
   currentView?: string;
+  user?: UserProfile | null;
 }
 
 export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
@@ -41,6 +44,7 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
   onOpenEducatorVerify,
   hasMindChangedBadge,
   currentView = "feed",
+  user,
 }) => {
   const TOPIC_ITEMS = [
     { name: "All", label: "All Subjects", icon: Compass },
@@ -84,18 +88,22 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
         <button
           onClick={onOpenEducatorVerify}
           className="flex flex-col items-center gap-1 text-[10px] text-slate-600 hover:text-slate-900 cursor-pointer"
+          title="Security & Gates"
         >
           <ShieldCheck className="h-5 w-5" />
-          <span>Verify</span>
+          <span>Gates</span>
         </button>
 
-        <button
-          onClick={onOpenAdmin}
-          className="flex flex-col items-center gap-1 text-[10px] text-slate-600 hover:text-slate-900 cursor-pointer"
-        >
-          <Layers className="h-5 w-5" />
-          <span>Queue</span>
-        </button>
+        {user?.role === "admin" && (
+          <button
+            onClick={onOpenAdmin}
+            className="flex flex-col items-center gap-1 text-[10px] text-amber-600 hover:text-amber-800 cursor-pointer"
+            title="Admin Moderation Queue"
+          >
+            <Layers className="h-5 w-5" />
+            <span>Admin</span>
+          </button>
+        )}
       </aside>
     );
   }
@@ -199,13 +207,24 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
           <span>Security &amp; Gates</span>
         </button>
 
-        <button
-          onClick={onOpenAdmin}
-          className="w-full flex items-center gap-3.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition-colors cursor-pointer"
-        >
-          <Layers className="h-4 w-4 text-amber-600" />
-          <span>Moderator Queue</span>
-        </button>
+        {user?.role === "admin" && (
+          <button
+            onClick={onOpenAdmin}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors cursor-pointer ${
+              currentView === "admin"
+                ? "bg-amber-100 text-amber-950 font-bold border border-amber-300 shadow-2xs"
+                : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+            }`}
+          >
+            <div className="flex items-center gap-3.5">
+              <Layers className="h-4 w-4 text-amber-600" />
+              <span>Admin Queue</span>
+            </div>
+            <span className="text-[9px] font-mono font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">
+              ADMIN
+            </span>
+          </button>
+        )}
       </div>
     </aside>
   );

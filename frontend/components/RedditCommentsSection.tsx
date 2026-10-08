@@ -341,7 +341,7 @@ export const RedditCommentsSection: React.FC<RedditCommentsSectionProps> = ({
             />
             <div className="flex items-center justify-between bg-slate-100/60 px-3 py-2 border-t border-slate-200/80">
               <span className="text-[11px] text-slate-500 font-medium">
-                Commenting as <strong className="text-slate-800">u/{user?.name || user?.username || "Learner"}</strong>
+                Commenting as <strong className="text-slate-800">u/{user?.username || user?.name || "user"}</strong>
               </span>
               <button
                 type="submit"

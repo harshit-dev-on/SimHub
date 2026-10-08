@@ -24,6 +24,8 @@ export const supabase = createClient(activeUrl, activeKey, {
   },
 });
 
+export type UserRole = "user" | "admin";
+
 export interface UserProfile {
   id: string;
   numericId: number;
@@ -31,7 +33,7 @@ export interface UserProfile {
   name: string;
   username: string;
   avatarUrl: string;
-  role: "educator" | "learner" | "admin";
+  role: UserRole;
   institution?: string;
 }
 
@@ -60,7 +62,7 @@ export function mapSupabaseUserToProfile(sbUser: SupabaseAuthUser): UserProfile 
     metadata.name ||
     metadata.user_name ||
     sbUser.email?.split("@")[0] ||
-    "SimHub Educator";
+    "SimHub Contributor";
 
   const username =
     metadata.user_name ||
@@ -73,6 +75,22 @@ export function mapSupabaseUserToProfile(sbUser: SupabaseAuthUser): UserProfile 
     metadata.picture ||
     `https://api.dicebear.com/7.x/bottts/svg?seed=${sbUser.id}`;
 
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+    .toLowerCase()
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
+  const userEmail = (sbUser.email || "").toLowerCase();
+  const isAdminEmail = Boolean(userEmail && adminEmails.includes(userEmail));
+
+  const role: UserRole =
+    isAdminEmail ||
+    metadata.role === "admin" ||
+    (sbUser as any).app_metadata?.role === "admin"
+      ? "admin"
+      : "user";
+
   return {
     id: sbUser.id,
     numericId,
@@ -80,7 +98,7 @@ export function mapSupabaseUserToProfile(sbUser: SupabaseAuthUser): UserProfile 
     name,
     username,
     avatarUrl,
-    role: "educator",
+    role,
   };
 }
 
@@ -92,7 +110,7 @@ export const DEMO_USERS: UserProfile[] = [
     username: "ecoteacher",
     email: "aris.thorne@delhi.ac.in",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    role: "educator",
+    role: "user",
     institution: "Dept. of Environmental Science, University of Delhi",
   },
   {
@@ -102,7 +120,17 @@ export const DEMO_USERS: UserProfile[] = [
     username: "priya_stem",
     email: "priya.learner@kv-school.edu.in",
     avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
-    role: "learner",
+    role: "user",
     institution: "Kendriya Vidyalaya, Sector 8",
+  },
+  {
+    id: "usr-admin",
+    numericId: 100001,
+    name: "Admin Moderator",
+    username: "admin_mod",
+    email: "admin@simhub.org",
+    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+    role: "admin",
+    institution: "SimHub Governance & Security",
   },
 ];

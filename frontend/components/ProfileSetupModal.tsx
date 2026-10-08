@@ -76,7 +76,7 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
   const [avatarUrl, setAvatarUrl] = useState(
     user?.avatarUrl || "https://api.dicebear.com/7.x/bottts/svg?seed=TerraBot&backgroundColor=0284c7"
   );
-  const [role, setRole] = useState<"educator" | "learner">("educator");
+  const role = user?.role === "admin" ? "admin" : "user";
   const [customUrlInput, setCustomUrlInput] = useState("");
   const [showCustomUrl, setShowCustomUrl] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -87,7 +87,6 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
       if (user.name) setName(user.name);
       if (user.username) setUsername(user.username);
       if (user.avatarUrl) setAvatarUrl(user.avatarUrl);
-      if (user.role === "educator" || user.role === "learner") setRole(user.role);
     }
   }, [user]);
 
@@ -115,8 +114,8 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
     setSaving(true);
 
     try {
-      const trimmedName = name.trim() || "SimHub Creator";
-      const trimmedUsername = username.trim() || "creator";
+      const trimmedName = name.trim() || "SimHub Contributor";
+      const trimmedUsername = username.trim() || "user";
       const cleanAvatar = avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${trimmedUsername}`;
 
       const updatedProfile: UserProfile = {
@@ -127,7 +126,7 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
         username: trimmedUsername,
         avatarUrl: cleanAvatar,
         role,
-        institution: user?.institution || (role === "educator" ? "SimHub Simulation Lab" : "Environmental Science Learner"),
+        institution: user?.institution || "SimHub STEM Community",
       };
 
       // If connected to Supabase Cloud, update user metadata
@@ -357,41 +356,30 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
             </div>
           </div>
 
-          {/* Role Pill Selector */}
+          {/* Account Role Display */}
           <div className="space-y-1.5 text-xs">
-            <label className="text-slate-300 font-semibold">Primary Platform Role</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setRole("educator")}
-                className={`flex items-center gap-2 p-3 rounded-2xl border text-left transition-all ${
-                  role === "educator"
-                    ? "border-blue-500 bg-blue-500/10 text-white shadow-xs"
-                    : "border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-800"
-                }`}
-              >
-                <ShieldCheck className="h-4 w-4 shrink-0 text-blue-500" />
+            <label className="text-slate-300 font-semibold">Account Role</label>
+            <div className="flex items-center justify-between p-3 rounded-2xl border border-slate-800 bg-slate-900/80">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className={`h-4 w-4 shrink-0 ${role === "admin" ? "text-amber-400" : "text-emerald-400"}`} />
                 <div>
-                  <div className="font-semibold text-white">Educator / Creator</div>
-                  <div className="text-[10px] text-slate-500">Can publish sims &amp; review gates</div>
+                  <div className="font-semibold text-white">
+                    {role === "admin" ? "Platform Administrator" : "Standard Platform User"}
+                  </div>
+                  <div className="text-[10px] text-slate-500">
+                    {role === "admin"
+                      ? "Full moderator queue & gate management privileges"
+                      : "Can build, test, upload, play simulations & join discussions"}
+                  </div>
                 </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("learner")}
-                className={`flex items-center gap-2 p-3 rounded-2xl border text-left transition-all ${
-                  role === "learner"
-                    ? "border-blue-500 bg-blue-500/10 text-white shadow-xs"
-                    : "border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-800"
-                }`}
-              >
-                <GraduationCap className="h-4 w-4 shrink-0 text-blue-500" />
-                <div>
-                  <div className="font-semibold text-white">Student / Learner</div>
-                  <div className="text-[10px] text-slate-500">Play sims &amp; earn POE badges</div>
-                </div>
-              </button>
+              </div>
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${
+                role === "admin"
+                  ? "bg-amber-400/10 text-amber-300 border-amber-400/30"
+                  : "bg-emerald-400/10 text-emerald-300 border-emerald-400/30"
+              }`}>
+                {role}
+              </span>
             </div>
           </div>
 

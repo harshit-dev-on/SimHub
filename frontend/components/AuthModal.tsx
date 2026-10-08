@@ -149,7 +149,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           username: username.toLowerCase(),
           email,
           avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`,
-          role: "educator",
+          role: "user",
         };
         onLoginSuccess(customUser);
         onClose();
@@ -345,23 +345,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           </div>
         </form>
 
-        {/* 1-Click Fast Profile Switcher */}
-        <div className="pt-3 border-t border-slate-100 space-y-2">
-          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-            1-Click Demo Profiles (Dr. Thorne &amp; Priya)
+        {/* 1-Click Fast Profile Switcher: Regular User vs Admin */}
+        <div className="pt-3 border-t border-slate-800 space-y-2">
+          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+            <span>Fast Profile Switcher (User vs Admin)</span>
+            <span className="text-cyan-400 font-mono text-[9px]">1-Click</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {DEMO_USERS.map((usr) => (
               <button
                 key={usr.id}
                 onClick={() => handleSelectDemoProfile(usr)}
-                className="flex items-center gap-2 p-2 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left transition-colors"
+                className={`flex items-center gap-2 p-2 rounded-xl border text-left transition-colors cursor-pointer ${
+                  usr.role === "admin"
+                    ? "border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20"
+                    : "border-slate-800 bg-slate-900 hover:bg-slate-800"
+                }`}
               >
                 <img src={usr.avatarUrl} alt={usr.name} className="h-6 w-6 rounded-full object-cover shrink-0 ring-1 ring-slate-700" />
                 <div className="min-w-0">
                   <div className="text-[11px] font-semibold text-white truncate">{usr.name}</div>
-                  <div className="text-[9px] text-slate-500 font-mono capitalize">{usr.role}</div>
+                  <div className={`text-[9px] font-mono font-bold uppercase ${usr.role === "admin" ? "text-amber-400" : "text-emerald-400"}`}>
+                    {usr.role === "admin" ? "🛡️ Admin" : "User"}
+                  </div>
                 </div>
               </button>
             ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { ShieldAlert } from "lucide-react";
 import { YouTubeHeader } from "@/components/YouTubeHeader";
 import { YouTubeSidebar } from "@/components/YouTubeSidebar";
 import { YouTubeFeed } from "@/components/YouTubeFeed";
@@ -218,6 +219,7 @@ export default function Home() {
           onOpenEducatorVerify={() => setCurrentView("verify")}
           hasMindChangedBadge={hasMindChangedBadge}
           currentView={currentView}
+          user={user}
         />
 
         {/* Dynamic Main Views */}
@@ -268,12 +270,32 @@ export default function Home() {
 
           {currentView === "admin" && (
             <div className="max-w-7xl mx-auto p-4 sm:p-6">
-              <AdminQueue
-                onQueueUpdated={() => {
-                  setRefreshTrigger((prev) => prev + 1);
-                }}
-                refreshTrigger={refreshTrigger}
-              />
+              {user?.role === "admin" ? (
+                <AdminQueue
+                  onQueueUpdated={() => {
+                    setRefreshTrigger((prev) => prev + 1);
+                  }}
+                  refreshTrigger={refreshTrigger}
+                />
+              ) : (
+                <div className="max-w-md mx-auto my-16 bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4 shadow-sm">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                    <ShieldAlert className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900">Administrator Access Only</h2>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      The moderation review queue and simulation gate approvals are reserved for platform administrators.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleGoHome}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Return to Home Feed</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </main>
