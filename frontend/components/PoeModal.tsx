@@ -102,10 +102,10 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
   const allPostAnswered = questions.length > 0 && questions.every((q) => postAnswers[q.id]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-2 sm:p-4 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative flex flex-col h-[92vh] w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-2 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative flex flex-col h-[92vh] w-full max-w-5xl rounded-3xl border border-slate-800/90 bg-slate-950 shadow-2xl overflow-hidden">
         {/* Top Header & POE Step Indicator */}
-        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-6 py-3">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-6 py-3.5">
           <div className="flex items-center gap-3">
             <span className="font-bold text-white text-sm sm:text-base">{simulation.title}</span>
             <span className="text-xs text-slate-400 hidden md:inline">Predict-Observe-Explain Learning Loop</span>
@@ -113,24 +113,24 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
 
           {/* Stepper Tabs */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs font-semibold">
+            <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800/80 text-xs font-semibold">
               <span
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  step === "predict" ? "bg-cyan-500/20 text-cyan-300" : "text-slate-500"
+                className={`px-3 py-1 rounded-lg transition-colors ${
+                  step === "predict" ? "bg-slate-800 text-white shadow-xs" : "text-slate-500"
                 }`}
               >
                 1. Predict
               </span>
               <span
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  step === "observe" ? "bg-emerald-500/20 text-emerald-300" : "text-slate-500"
+                className={`px-3 py-1 rounded-lg transition-colors ${
+                  step === "observe" ? "bg-slate-800 text-white shadow-xs" : "text-slate-500"
                 }`}
               >
                 2. Observe
               </span>
               <span
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  step === "explain" || step === "reveal" ? "bg-purple-500/20 text-purple-300" : "text-slate-500"
+                className={`px-3 py-1 rounded-lg transition-colors ${
+                  step === "explain" || step === "reveal" ? "bg-slate-800 text-white shadow-xs" : "text-slate-500"
                 }`}
               >
                 3. Explain
@@ -139,7 +139,7 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
 
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+              className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -147,18 +147,18 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
         </div>
 
         {/* Observation Prompt Banner */}
-        <div className="bg-slate-950/60 border-b border-slate-800/80 px-6 py-2.5 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-slate-300">
-            <Eye className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="bg-amber-50/80 border-b border-amber-100 px-6 py-3 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-slate-800">
+            <Eye className="h-4 w-4 text-amber-600 shrink-0" />
             <span>
-              <strong className="text-emerald-400">Guiding Question:</strong> {observationPrompt}
+              <strong className="text-amber-800">Guiding Question:</strong> {observationPrompt}
             </span>
           </div>
 
           {(step === "predict" || step === "explain") && (
             <button
               onClick={handleScriptedFill}
-              className="text-[11px] text-slate-500 hover:text-slate-300 underline font-mono shrink-0"
+              className="text-[11px] text-slate-500 hover:text-slate-900 underline font-mono shrink-0"
               title="Fast autofill matching 3-min pitch script"
             >
               [Stage Script Auto-Fill]
@@ -167,19 +167,19 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 relative">
+        <div className="flex-1 overflow-y-auto p-6 relative bg-slate-950">
           {/* STEP 1: PREDICT */}
           {step === "predict" && (
             <div className="max-w-2xl mx-auto space-y-6">
-              <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 text-xs text-cyan-200">
+              <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-xs text-blue-900">
                 <strong>Phase 1: Make Your Prediction.</strong> Before interacting with the simulation, register your
                 initial intuition. Wrong guesses will help uncover hidden cognitive misconceptions!
               </div>
 
               {questions.map((q, idx) => (
-                <div key={q.id} className="rounded-xl border border-slate-800 bg-slate-950/50 p-5 space-y-3">
+                <div key={q.id} className="rounded-2xl border border-slate-800/90 bg-slate-900/50 p-5 space-y-3 shadow-xs">
                   <div className="text-sm font-semibold text-white">
-                    <span className="text-cyan-400 mr-2">Q{idx + 1}.</span>
+                    <span className="text-blue-600 mr-2">Q{idx + 1}.</span>
                     {q.question}
                   </div>
                   <div className="space-y-2">
@@ -187,9 +187,9 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
                       <label
                         key={opt.id}
                         onClick={() => setPreAnswers({ ...preAnswers, [q.id]: opt.id })}
-                        className={`flex items-start gap-3 p-3 rounded-lg border text-xs cursor-pointer transition-all ${
+                        className={`flex items-start gap-3 p-3 rounded-xl border text-xs cursor-pointer transition-all ${
                           preAnswers[q.id] === opt.id
-                            ? "border-cyan-500 bg-cyan-500/10 text-white"
+                            ? "border-blue-500 bg-blue-500/10 text-white font-medium"
                             : "border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:bg-slate-800/50"
                         }`}
                       >
@@ -198,7 +198,7 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
                           name={`pre-${q.id}`}
                           checked={preAnswers[q.id] === opt.id}
                           onChange={() => {}}
-                          className="mt-0.5 accent-cyan-500"
+                          className="mt-0.5 accent-blue-600"
                         />
                         <span>{opt.text}</span>
                       </label>
@@ -211,13 +211,13 @@ export const PoeModal: React.FC<PoeModalProps> = ({ simulation, onClose }) => {
                 <button
                   disabled={!allPredictAnswered}
                   onClick={() => setStep("observe")}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-semibold shadow-lg transition-all ${
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-all ${
                     allPredictAnswered
-                      ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 hover:from-emerald-400 hover:to-cyan-400 shadow-emerald-500/20"
+                      ? "bg-slate-950 text-white hover:bg-slate-900 shadow-sm"
                       : "bg-slate-800 text-slate-500 cursor-not-allowed"
                   }`}
                 >
-                  <span>Lock Predictions & Observe Simulation</span>
+                  <span>Lock Predictions &amp; Observe Simulation</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

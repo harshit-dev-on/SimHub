@@ -163,55 +163,55 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl rounded-3xl border border-slate-800/90 bg-slate-950 p-7 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+          className="absolute right-5 top-5 rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Header */}
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{isFirstTime ? "First Time Setup" : "Channel Customization"}</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold">
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            <span>{isFirstTime ? "First Time Setup" : "Profile Customization"}</span>
           </div>
           <h2 className="text-xl font-bold text-white pt-1">
-            {isFirstTime ? "Welcome to SimHub! Set Up Your Channel" : "Edit Nickname & Avatar"}
+            {isFirstTime ? "Welcome to SimHub! Set Up Your Profile" : "Edit Nickname & Avatar"}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Pick your display nickname and avatar to represent your simulations &amp; feedback
           </p>
         </div>
 
-        {/* Live YouTube Channel Card Preview */}
-        <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 relative overflow-hidden shadow-inner">
-          <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-red-600/30 via-emerald-600/20 to-cyan-600/30"></div>
-          <div className="relative pt-4 flex items-center gap-3">
+        {/* Live Profile Card Preview */}
+        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/80 p-4 relative overflow-hidden shadow-xs">
+          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-r from-rose-200/50 via-amber-200/30 to-blue-200/40"></div>
+          <div className="relative pt-3 flex items-center gap-3">
             <div className="relative">
               <img
                 src={avatarUrl}
                 alt={name}
-                className="h-16 w-16 rounded-full object-cover ring-3 ring-emerald-500/70 bg-slate-900 shadow-md"
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-slate-800 bg-slate-950 shadow-sm"
               />
-              <span className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] text-slate-950 font-bold">
+              <span className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white font-bold">
                 ✓
               </span>
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-bold text-white truncate">{name || "Your Channel Name"}</span>
-                <span className="rounded bg-red-600/20 border border-red-500/40 px-1.5 py-0.2 text-[9px] font-bold text-red-300 uppercase">
-                  SIMHUB EDU
+                <span className="text-base font-bold text-white truncate">{name || "Your Display Name"}</span>
+                <span className="rounded-full bg-slate-800/80 px-2 py-0.5 text-[9px] font-bold text-slate-300 uppercase">
+                  SIMHUB
                 </span>
               </div>
-              <div className="text-xs text-slate-400 font-mono">@{username || "handle"}</div>
-              <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400">
-                <span className="capitalize text-emerald-400 font-medium">● {role}</span>
+              <div className="text-xs text-slate-500 font-mono">@{username || "handle"}</div>
+              <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                <span className="capitalize text-blue-400 font-medium">● {role}</span>
                 <span>•</span>
-                <span>0 Simulations Published</span>
+                <span>Verified Learner</span>
               </div>
             </div>
           </div>
@@ -364,32 +364,32 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
               <button
                 type="button"
                 onClick={() => setRole("educator")}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                className={`flex items-center gap-2 p-3 rounded-2xl border text-left transition-all ${
                   role === "educator"
-                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-300 shadow-sm"
-                    : "border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900"
+                    ? "border-blue-500 bg-blue-500/10 text-white shadow-xs"
+                    : "border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-800"
                 }`}
               >
-                <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-400" />
+                <ShieldCheck className="h-4 w-4 shrink-0 text-blue-500" />
                 <div>
                   <div className="font-semibold text-white">Educator / Creator</div>
-                  <div className="text-[10px] text-slate-400">Can publish sims &amp; review gates</div>
+                  <div className="text-[10px] text-slate-500">Can publish sims &amp; review gates</div>
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setRole("learner")}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                className={`flex items-center gap-2 p-3 rounded-2xl border text-left transition-all ${
                   role === "learner"
-                    ? "border-cyan-500 bg-cyan-500/10 text-cyan-300 shadow-sm"
-                    : "border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900"
+                    ? "border-blue-500 bg-blue-500/10 text-white shadow-xs"
+                    : "border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-800"
                 }`}
               >
-                <GraduationCap className="h-4 w-4 shrink-0 text-cyan-400" />
+                <GraduationCap className="h-4 w-4 shrink-0 text-blue-500" />
                 <div>
                   <div className="font-semibold text-white">Student / Learner</div>
-                  <div className="text-[10px] text-slate-400">Play sims &amp; earn POE badges</div>
+                  <div className="text-[10px] text-slate-500">Play sims &amp; earn POE badges</div>
                 </div>
               </button>
             </div>
@@ -400,17 +400,17 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white font-bold text-xs hover:opacity-95 shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-200 shadow-sm transition-all flex items-center justify-center gap-1.5"
             >
               <Check className="h-4 w-4" />
-              <span>{saving ? "Saving Channel Profile..." : "Save Channel Profile & Enter SimHub"}</span>
+              <span>{saving ? "Saving Profile..." : "Save Profile & Enter SimHub"}</span>
             </button>
 
             {isFirstTime && (
               <button
                 type="button"
                 onClick={onClose}
-                className="py-2.5 px-4 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs transition-colors"
+                className="py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:bg-slate-800 text-xs transition-colors"
               >
                 Skip for Now
               </button>

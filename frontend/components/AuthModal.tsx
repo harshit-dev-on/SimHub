@@ -173,45 +173,45 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 max-h-[94vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md rounded-3xl border border-slate-800/90 bg-slate-950 p-7 shadow-2xl space-y-4 max-h-[94vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+          className="absolute right-5 top-5 rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Brand Header */}
         <div className="text-center space-y-1">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-rose-700 text-white shadow-lg shadow-red-600/30">
-            <span className="text-xl font-black">▶</span>
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-md">
+            <span className="text-xl font-bold bg-gradient-to-tr from-rose-400 to-indigo-400 bg-clip-text text-transparent">✦</span>
           </div>
-          <h2 className="text-xl font-bold text-white pt-2">Sign into SimHub EDU</h2>
-          <p className="text-xs text-slate-400">
-            Browse, play, rate, and publish educational simulations
+          <h2 className="text-xl font-bold text-white pt-2">Sign into SimHub</h2>
+          <p className="text-xs text-slate-500">
+            Explore interactive simulations and participate in POE challenges
           </p>
         </div>
 
         {errorMsg && (
-          <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-2.5 text-xs text-rose-300">
+          <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700">
             {errorMsg}
           </div>
         )}
 
         {infoMsg && (
-          <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-2.5 text-xs text-emerald-300">
+          <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800">
             {infoMsg}
           </div>
         )}
 
         {/* Social Sign In Buttons */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {/* Google Sign In Button */}
           <button
             onClick={handleGoogleOAuth}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-700 bg-white text-xs font-semibold text-slate-900 hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -238,7 +238,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           <button
             onClick={handleGithubOAuth}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs font-semibold text-white hover:bg-slate-700 transition-colors shadow-sm cursor-pointer"
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs font-semibold text-white hover:bg-slate-700 transition-colors shadow-xs cursor-pointer"
           >
             <svg className="h-4 w-4 fill-white" viewBox="0 0 24 24">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
@@ -253,28 +253,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               onLoginSuccess(DEMO_USERS[0]);
               onClose();
             }}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/20 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-all cursor-pointer"
           >
-            <CheckCircle2 className="h-4 w-4" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
             <span>Instant Demo Sign In as Dr. Thorne (GitHub #9841234)</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 my-2 text-slate-500 text-[11px]">
+        <div className="flex items-center gap-2 my-2 text-slate-400 text-[11px]">
           <div className="flex-1 h-px bg-slate-800"></div>
           <span>OR CONTINUE WITH EMAIL</span>
           <div className="flex-1 h-px bg-slate-800"></div>
         </div>
 
         {/* Tab Toggle for Sign In vs Sign Up */}
-        <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+        <div className="flex rounded-xl bg-slate-900 p-1 border border-slate-800/80">
           <button
             type="button"
             onClick={() => setTab("signin")}
             className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               tab === "signin"
-                ? "bg-cyan-500 text-slate-950 shadow-sm"
-                : "text-slate-400 hover:text-white"
+                ? "bg-slate-800 text-white shadow-xs"
+                : "text-slate-500 hover:text-white"
             }`}
           >
             Sign In
@@ -284,8 +284,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
             onClick={() => setTab("signup")}
             className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               tab === "signup"
-                ? "bg-cyan-500 text-slate-950 shadow-sm"
-                : "text-slate-400 hover:text-white"
+                ? "bg-slate-800 text-white shadow-xs"
+                : "text-slate-500 hover:text-white"
             }`}
           >
             Create Account
@@ -295,33 +295,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
         {/* Email & Password Form */}
         <form onSubmit={handleEmailAuth} className="space-y-3 text-xs">
           <div>
-            <label className="text-slate-400 block mb-1">Email Address</label>
+            <label className="text-slate-300 font-medium block mb-1">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@school.edu.in"
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-white focus:border-cyan-500 focus:outline-none transition-all"
             />
           </div>
 
           <div>
-            <label className="text-slate-400 block mb-1">Password</label>
+            <label className="text-slate-300 font-medium block mb-1">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-white focus:border-cyan-500 focus:outline-none transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors shadow-sm"
+            className="w-full py-2.5 rounded-xl bg-white text-slate-900 font-bold hover:bg-slate-200 transition-colors shadow-xs"
           >
             {loading
               ? tab === "signin"
@@ -336,7 +336,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
             <button
               type="button"
               onClick={() => setTab(tab === "signin" ? "signup" : "signin")}
-              className="text-[11px] text-slate-400 hover:text-cyan-300 underline"
+              className="text-[11px] text-slate-500 hover:text-white underline"
             >
               {tab === "signin"
                 ? "Don't have an account yet? Create one here"
@@ -346,7 +346,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
         </form>
 
         {/* 1-Click Fast Profile Switcher */}
-        <div className="pt-2 border-t border-slate-800 space-y-2">
+        <div className="pt-3 border-t border-slate-100 space-y-2">
           <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             1-Click Demo Profiles (Dr. Thorne &amp; Priya)
           </div>
@@ -356,12 +356,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               <button
                 key={usr.id}
                 onClick={() => handleSelectDemoProfile(usr)}
-                className="flex items-center gap-2 p-2 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 text-left transition-colors"
+                className="flex items-center gap-2 p-2 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left transition-colors"
               >
-                <img src={usr.avatarUrl} alt={usr.name} className="h-6 w-6 rounded-full object-cover shrink-0" />
+                <img src={usr.avatarUrl} alt={usr.name} className="h-6 w-6 rounded-full object-cover shrink-0 ring-1 ring-slate-700" />
                 <div className="min-w-0">
                   <div className="text-[11px] font-semibold text-white truncate">{usr.name}</div>
-                  <div className="text-[9px] text-slate-400 font-mono capitalize">{usr.role}</div>
+                  <div className="text-[9px] text-slate-500 font-mono capitalize">{usr.role}</div>
                 </div>
               </button>
             ))}

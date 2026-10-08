@@ -153,25 +153,25 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-3 sm:p-5 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative flex flex-col max-h-[92vh] w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-3 sm:p-5 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative flex flex-col max-h-[92vh] w-full max-w-3xl rounded-3xl border border-slate-800/90 bg-slate-950 shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/70 px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-800 text-white shadow-xs">
               <Upload className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-white">Upload Your Simulation Website</h2>
-              <p className="text-[11px] text-slate-400">
-                Publish an externally hosted environmental simulation to the verified SimHub registry
+              <p className="text-[11px] text-slate-500">
+                Publish an externally hosted interactive simulation to the verified SimHub registry
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -350,16 +350,16 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           </div>
 
           {/* Submit Action */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
             <span className="text-[11px] text-slate-400">
-              Published simulations run sandboxed in learner browsers with zero server-side code execution.
+              Simulations run sandboxed in learner browsers with zero server-side code execution.
             </span>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+                className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -367,7 +367,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               <button
                 type="submit"
                 disabled={isVerifying}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold hover:from-emerald-400 hover:to-cyan-400 shadow-md shadow-emerald-500/20"
+                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-white text-slate-900 font-bold hover:bg-slate-200 shadow-sm transition-all"
               >
                 {isVerifying ? "Auditing Gates & Publishing..." : "Verify & Publish Simulation"}
               </button>
