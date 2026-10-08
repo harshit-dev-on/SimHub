@@ -2,16 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import { ShieldAlert } from "lucide-react";
-import { YouTubeHeader } from "@/components/YouTubeHeader";
-import { YouTubeSidebar } from "@/components/YouTubeSidebar";
-import { YouTubeFeed } from "@/components/YouTubeFeed";
-import { WatchView } from "@/components/WatchView";
-import { SubscriptionsFeed } from "@/components/SubscriptionsFeed";
-import { UploadModal } from "@/components/UploadModal";
-import { AuthModal } from "@/components/AuthModal";
-import { ProfileSetupModal } from "@/components/ProfileSetupModal";
-import { EducatorConsole } from "@/components/EducatorConsole";
-import { AdminQueue } from "@/components/AdminQueue";
+import {
+  YouTubeHeader,
+  YouTubeSidebar,
+  YouTubeFeed,
+  WatchView,
+  SubscriptionsFeed,
+  UploadModal,
+  AuthModal,
+  ProfileSetupModal,
+  EducatorConsole,
+  AdminQueue,
+} from "@/components";
 import { SimulationEntry } from "@/lib/store";
 import {
   DEMO_USERS,
