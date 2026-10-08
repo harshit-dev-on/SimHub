@@ -1,0 +1,164 @@
+[SEC_1_METADATA]
+- PS_ID & Title: Visual Simulations and Gamified Environmental Education Platform for Schools and Colleges
+- Category & Domain: Software / EdTech (Environmental Education)
+- Problem Context:
+  * Good environmental simulations are scattered across educator repos and personal sites, with no discovery, no safety vetting, and no way to tell who is attributable for a given link.
+  * Learners, many under 18, cannot tell a working, safe simulation from a dead or tracker-laden one. Static content also rarely confronts the misconceptions that matter, for example that holding emissions flat stabilizes atmospheric CO₂.
+
+[SEC_2_PROPOSED_SOLUTION_TWO_TIER]
+- Solution Title: **EcoVerse Hub**: a centrally moderated, challenge-verified registry of externally hosted environmental simulations, with a predict-observe-explain learning loop.
+- Selected Core Mechanism: A **registry, not a hosting platform**. Educators keep ownership and hosting, while verification and moderation are central. Positioning: we treat third-party simulations as an attack surface, not a content library. Pitch line: **we verify who is accountable, not what is benign.** Our servers never execute third-party code. They fetch pages and scripts as inert bytes (hashed and string-scanned) and never run them. Simulations run only in the learner's own browser, in a sandboxed iframe or their own tab.
+  1. **Hard gates.** Approval is blocked unless all six pass. Each gate has its own route and its own timestamped result.
+     * G1 Ownership: the numeric GitHub user ID captured at OAuth sign-in equals the repo owner's numeric ID (user-owned repos in Tier 2). The repo is read with our PAT, so no user token is stored. We match the numeric ID, not the login, because logins can be renamed and later claimed by someone else.
+     * G2 Linkage: `ecoverse.json` must exist in the repo's default branch (checked at `ecoverse.json`, `public/ecoverse.json`, `docs/ecoverse.json`) and at the **published root, defined as the directory of the submitted live URL**. A project page `https://user.github.io/repo/` therefore expects `https://user.github.io/repo/ecoverse.json`. Both copies must carry the same token. The token is **derived, not issued**: `HMAC(server_secret, github_user_id | repo_id | normalized_live_url)` with a key-version prefix. It is stateless, so a manifest committed days earlier still verifies, and a token copied from someone else's repo fails because the binding differs. It is public by design, so its value is binding, not secrecy. G2 proves one attributable party controls both source and origin. It does not prove the deployed bytes were built from that source.
+     * G3 Liveness: HTTPS, 2xx, HTML content type, within size and time caps.
+     * G4 Safe Browsing: live URL clean.
+     * G5 License: an OSI-approved SPDX identifier.
+     * G6 Static ad/tracker-origin scan: the entry HTML and its same-origin scripts (up to 10 scripts, 2 MB each, 8 MB total, fetched as inert bytes through the hardened wrapper) are string-scanned against a pinned Disconnect tracker-domain list, supplemented by EasyPrivacy. We flag its advertising, analytics, fingerprinting, and social categories; font and library CDNs only enter the external-origin set. The gate passes if no listed hostname is found. The breakdown shows coverage ("7 scripts scanned, 1 unscanned: oversized"). It cannot see runtime-constructed or dynamically loaded trackers and is not a child-safety certification, and the UI says both.
+  2. **Warnings.** Shown to admins and learners, never blocking: framing disallowed (launches in a new tab), repo inactive for 12 months or more, cross-origin redirect, optional manifest fields missing, and partial G6 coverage (oversized scripts unscanned). There is no numeric score. The artifact is the per-check breakdown with timestamps.
+  3. **Drift detection.** At approval we store a fingerprint: SHA-256 of the entry HTML, SHA-256 of every scanned same-origin script, size and ETag for unscanned ones, the external script and iframe origin set, and the token. "Re-verify now" re-runs all six gates and recomputes it. If any gate fails (token gone, Safe Browsing hit, tracker hostname in the HTML or in any scanned script), the entry is **auto-restricted**. If all gates pass but any hash or origin changed, the entry is **re-queued** with a "content changed" label listing the files. Coverage is scripts referenced by the entry HTML, including `modulepreload`. Chunks fetched only at runtime are Tier 1.
+  4. **Learner reports.** The anonymous "Report this simulation" button auto-restricts the entry from search pending admin review. It is reversible and fails closed. It is the honest answer to cloaking, where a site shows our vetter clean pages and learners something else. A server-side fetch cannot fully detect that, so the defense is layered (see Q&A defense). The button is built but is not part of the stage script.
+  5. **Learner loop (predict-observe-explain**, an established science-teaching pattern**).**
+     * Predict: 3 MCQs aimed at common misconceptions. Wrong options carry an educator-authored misconception label. Answer keys, labels, and explanations live only on our server. The public manifest carries none of them.
+     * Observe: the learner plays the simulation in the sandboxed iframe, preloaded while predictions are answered, guided by a one-line observation prompt.
+     * Explain: pre and post answers (post options in shuffled order) are sent together to the server, which grades them, returns the per-question explanation and misconception label, and marks flips. One badge, **"Mind changed"**, is earned on at least one wrong-to-right flip and stored in `localStorage` as a progress marker, not a credential.
+     * The learner is anonymous: no accounts and no learner identifiers stored by the application. Only per-question counters are kept. Flips are reported as **net flips** (wrong-to-right minus right-to-wrong), since MCQ answers can flip by chance. The loop measures answer change, not retention.
+- TIER 1 - Enterprise Vision:
+  * Deck appendix only, not spoken: NCERT/NEP 2020 topic mapping, Hindi and regional-language search, takedown SLAs.
+  * Multi-vantage headless-browser crawler (several egress IPs, randomized timing) that logs real network requests, catching runtime-injected trackers and reducing cloaking. Scheduled re-verification and runtime-chunk coverage.
+  * Higher-assurance tier: GitHub Actions build-provenance attestations binding a deployed artifact digest to repo and commit, plus a byte-identity check for unbuilt static sites. This is the path from "attributable" to "built from that repo".
+  * Sybil resistance: institutional verification (an edu-domain email such as `.ac.in` or `.edu.in`, or a verified school or college GitHub organization) and account-age thresholds before an entry lists without an "unverified publisher" label. Bans apply to numeric user ID, repo ID, and live origin.
+  * Org-owned repos via membership and permission checks, admin gate overrides with an audit trail, and an educator dashboard of net flips and misconception counts per simulation.
+  * Q&A defense:
+    - *"How do you know the site is built from that repo?"* We prove who is attributable. One GitHub-verified owner controls both repo and live origin. Provenance attestation is the Tier 1 upgrade.
+    - *"What stops a swap after approval? I changed `game.js` and the HTML is identical."* The fingerprint covers the entry HTML and every same-origin script, so that swap is caught and shown live. Runtime-fetched chunks and runtime-injected trackers are out of Tier 2 coverage, and Tier 1 adds the crawler.
+    - *"Accountable to whom?"* A GitHub account: attributable by numeric ID and bannable by ID, repo, and origin. It is not a legal identity. Tier 1 adds institutional verification.
+    - *"Cloaking?"* One server-side fetch cannot fully catch it. Containment is the sandbox (no popups, top-navigation, or forms). Detection is learner reports that auto-restrict, plus multi-vantage re-crawls in Tier 1. Recourse is a bannable owner.
+    - *"SSRF from fetching user URLs?"* Every outbound fetch goes through one hardened wrapper (Sec 3).
+    - *"Fork a good repo, deploy a malicious site, copy the token?"* The token binds to the copier's own user ID, repo ID, and URL, so a copied token fails. A fork with its own valid token proves control, not benignity. Safe Browsing, G6, the sandbox, and human review cover that.
+    - *"Does no-tracking hold?"* We store no learner identifiers, though infrastructure logs may hold IPs. The destination is outside our control, and G6 is a static scan, not a certificate.
+    - *"Isn't a flip just chance?"* We report net flips and shuffle post options. Stage flips are a scripted demonstration of the mechanism, and learning gains are a pilot question.
+    - *"Is it federated?"* It is a centrally moderated registry of externally hosted simulations.
+- TIER 2 - 24-Hour Hackathon Slice (3-minute stage flow, stopwatch-rehearsed, rejection first):
+  * Repo B is an original ~100-line "carbon bathtub" simulation (emissions and uptake sliders driving an atmospheric CO₂ stock chart) that we author as an educator stand-in, disclosed on stage. It lives in a public repo with an MIT license and is deployed to its own origin (not Pages) with a per-request toggle on `game.js`. One entry carries the whole story: submitted, verified, approved, learned from, drifted, pulled.
+  1. **0:00-0:15, problem.** One "k of n" line from the corpus run, largest real number first, then "we verify who is accountable, not what is benign."
+  2. **0:15-0:50, rejection, then pass.** The pre-authenticated educator submits Repo A, which has no manifest. Six gate calls fire in parallel, ticks land as each returns, and G2 fails in red: "Token not found in repo or live site." Then Repo B: six green, with one row expanded to show its timestamp.
+  3. **0:50-1:00, approval.** The admin queue shows Repo B's six gates and warnings, and the admin approves with one tap.
+  4. **1:00-2:20, learner loop on Repo B.** "carbon cycle" is pre-typed. The interstitial shows the breakdown and "outside our control" for about 5 seconds. Three predictions are tapped from a scripted run so that two flip, and they are never read aloud. The simulation plays, three post taps follow, and the graded reveal shows 2 net flips with misconception labels and the "Mind changed" badge.
+  5. **2:20-2:50, drift.** The toggle changes `game.js` while the HTML stays byte-identical, adding a tracker hostname. "Re-verify now" fails G6, the entry is auto-restricted, and a search refresh shows it gone. This is the same-name script swap, shown failing.
+  6. **2:50-3:00, close.** "Attributable and bannable."
+  * Cut order if over time: the report tap (already off script), then narrate the drift beat over a pre-loaded result tab. Never cut the rejection or the flip.
+- Innovation & Differentiator:
+  * PhET, NCERT e-content, and DIKSHA are curated by one organization, and Scratch and Wokwi galleries host the content. EcoVerse separates the two: educators keep hosting and ownership, and verification, safety gates, and moderation are central.
+  * The trust model is explicit and falsifiable: named gates, visible failures, script-level drift detection, and a stated list of what is not proven.
+  * The loop uses predict-observe-explain with misconception-labeled distractors, server-held keys, and an anonymous learner, so the education layer needs no learner data.
+  * Cost honesty: no simulation code is hosted, but moderator time and re-verification crawling still scale with catalogue size.
+- [EVALUATED_&_DISCARDED_SOLUTION_ALTERNATIVES]:
+  * Alternative 1: Host and run all simulations on our own servers (upload ZIPs or build from repo) -> REJECTED: arbitrary third-party code execution creates a major security and sandboxing burden, builds vary widely (React, Unity WebGL, Python/Streamlit), and compute and storage costs grow with every upload. Infeasible in 24 hours and costly at scale.
+  * Alternative 2: Plain link directory with no vetting or admin gate -> REJECTED: no protection against dead links or malicious sites, and no way for admins to act on reports. It was the baseline the first draft had to beat, and the gates and drift handling are what separate us from it.
+  * Alternative 3: Build our own in-house simulations as the product model -> REJECTED: depth is limited to what a small team can build, and it abandons the educator-contribution model. One ~100-line first-party simulation is built only as the demo's Repo B.
+  * Alternative 4: Redirect-only launch with a quiz after "returning" (earlier iteration) -> REJECTED: the learner leaves our product and the loop breaks. Replaced by a sandboxed iframe where framing is allowed, with new-tab fallback.
+  * Alternative 5: DNS TXT record for ownership proof -> REJECTED: educators on `github.io` or free school hosting do not control DNS.
+  * Alternative 6: Mandatory GitHub Actions build-provenance attestations as the approval gate -> REJECTED for Tier 2: most teacher repos have no CI, and it cannot be stabilized in 24 hours. Kept as the optional high-assurance tier in Tier 1.
+  * Alternative 7: Single-vantage server fetch as the only defense against cloaking and post-approval swap -> REJECTED as sufficient: the owner controls the origin and can serve the vetter something different. Replaced by sandbox containment, learner reports that auto-restrict, and script-level drift fingerprints, with multi-vantage crawling in Tier 1.
+  * Alternative 8: A truly federated or peer-moderated registry (independent moderator nodes) -> REJECTED: inconsistent safety standards and coordination overhead for a product whose value is one trust bar. The architecture is central moderation of externally hosted simulations, and we describe it that way.
+  * CUT in this iteration:
+    - **"Child-safety scan" label on G6.** It overclaimed. Renamed "static ad/tracker-origin scan" with a named blocklist and a visible coverage line.
+    - **HTML-only scan and fingerprint.** SPA and Unity WebGL shells inject trackers from JavaScript, and a same-name `game.js` swap was invisible. Now covers HTML plus same-origin scripts.
+    - **Streaks and multi-badge gamification.** They cannot be shown in 3 minutes, and a `localStorage` streak verifies nothing. One "Mind changed" badge remains.
+    - **"Federated" framing.** Replaced by "centrally moderated registry of externally hosted simulations".
+    - **Separate drift-demo entry.** Repo B is now the drift origin, so one entry tells one story.
+    - **Report tap on stage.** The feature stays, but the stage minute goes to the flip.
+    - **"No personal data from learners" wording.** Replaced by "no learner identifiers stored by the application", because infrastructure logs may hold IPs.
+    - **Flip counts as a headline.** Replaced by net flips, labeled client-reported.
+    - **Running the corpus through G1 and G2.** They fail 100% by construction and are excluded from reported results.
+    - **Earlier cuts stand:** numeric score, public-key MCQs, learner accounts, Realtime, live OAuth on stage, Pages drift demo, percentage metrics, reputation scores, topic graph, DIKSHA widget, the 50 to 70% efficiency claim, and the "zero hosting cost" claim.
+  * Selection Justification: Central moderation of externally hosted simulations keeps third-party code off our servers. Challenge-verified linkage and script-level drift detection turn trust into something the stage can prove and fail. The anonymous predict-observe-explain loop supplies the education value without learner accounts. Each rejected alternative either executes untrusted code, proves nothing, or cannot be built and stabilized in 24 hours.
+
+[SEC_3_TECHNICAL_ARCHITECTURE_TWO_TIER]
+- TIER 1 - Production Cloud Architecture:
+  * Stateless containerized API behind a CDN and WAF, PostgreSQL with read replicas, and a dedicated search engine only if Postgres full-text is outgrown.
+  * Multi-vantage crawler pool (headless browser, multiple egress IPs, randomized schedule) for dynamic tracker detection and cloaking resistance, a scheduled re-verification worker, and an optional attestation verifier using GitHub's attestation API.
+  * Security: GitHub OAuth for educators and admins, RBAC, HMAC-derived challenge tokens with key rotation, immutable audit log, CSP, `rel="noopener noreferrer"`, sandboxed framing, and the hardened fetch wrapper in an egress-restricted network segment. Commercial deployments use the Web Risk API instead of Safe Browsing, whose terms cover non-commercial use.
+  * Learner data: no accounts and no learner identifiers stored by the application. Only anonymous per-question counters, with minimized log retention.
+- TIER 2 - 24-Hour Prototype Stack:
+  * Minimal Local Stack: Next.js (Node-runtime API routes) + Supabase (Postgres, GitHub auth provider, RLS) + GitHub REST API (PAT) + Google Safe Browsing lookup + Postgres `tsvector` search + Tailwind on Vercel. Repo B's live origin is a separate tiny deployment serving `index.html` and `game.js` with `Cache-Control: no-store` and a toggle flag read per request.
+  * **Hardened fetch wrapper (single code path for every outbound request; Q&A pocket, zero stage time):**
+    * HTTPS only, ports restricted to 443.
+    * DNS is resolved first, and loopback, private, link-local (including the cloud metadata address), CGNAT, and IPv6 equivalents are blocked. The validated IP is pinned at connect time to defeat DNS rebinding.
+    * Maximum 3 redirects, each hop revalidated.
+    * 2 MB response cap, 4 s timeout, content-type allowlist (HTML, JavaScript, JSON), no credentials, and `cache: no-store` with no-cache request headers.
+    * Scripts are fetched as inert bytes, hashed and string-scanned, never executed.
+    * GitHub URLs are accepted only as `https://github.com/{owner}/{repo}` and read through the fixed GitHub API host.
+  * End-to-End Demo Flow: pre-authenticated educator -> `POST /api/submissions` creates the row and the educator console shows the derived token and a copy-paste manifest -> six parallel gate calls, one route per gate (`ownership`, `linkage`, `liveness`, `license`, `safebrowsing`, `scan`), each writing its own timestamped result row and ticking into the UI when it returns (`liveness` and `scan` each fetch the entry HTML independently, which keeps routes independent) -> admin queue reads the gate rows, and Approve is enabled only if all six pass -> fingerprint stored on approval -> indexed -> anonymous learner search -> interstitial -> predictions held in memory -> sandboxed iframe (hidden preload during predictions) -> `/api/quiz/grade` with pre and post -> flips, explanations, local badge -> report button.
+  * Warm-up: at T-60 s a script calls all six gate routes and the grade route, then pings them every 20 s until the pitch ends. Five or six simultaneous cold starts would stagger the ticks and look like a bug.
+  * Pre-event jobs (offline):
+    * **Corpus run:** the same vetter in batch mode over a fixed sample (first 50 results of a published GitHub search over named topics, with query and date published). It runs only gates independent of our manifest (G3, G4, G5, G6, plus warnings and whether a live URL is listed). G1 and G2 are excluded because they fail 100% by construction.
+    * **Seed and tags:** README-derived topic and grade tags are precomputed offline, spot-checked by hand, and stored as editable suggestions. Runtime search is plain Postgres with no model call.
+    * **Demo reset script:** restores Repo B to approved-and-clean with the toggle off, warms the index, and clears the local badge. Run before every rehearsal and before judging-booth demos.
+- REAL_VS_MOCKED_MATRIX (TIER 2):
+  * Real (Built & Functional): GitHub login capture and numeric-ID ownership gate, HMAC token derivation, repo-manifest and live-manifest linkage check, license, liveness and frame-policy check, Safe Browsing, the HTML-plus-same-origin-scripts scan with coverage line, the hardened fetch wrapper, six parallel per-gate routes, gate and warning breakdown, admin approve and restrict, approval fingerprint, "Re-verify now" with hard-fail and soft-drift paths, learner report with auto-restrict, tag search, sandboxed iframe with new-tab fallback, server-graded pre/post loop with shuffled post options and anonymous counters, local badge, and the corpus run.
+  * Mocked (Seeded/Hardcoded): live sign-in on stage (flow built, session pre-authenticated), quiz authoring form (quizzes, misconception labels, and observation prompts seeded for demo entries), educator dashboard, scheduled re-verification, multilingual search, NCERT mapping, org-repo permission checks, owner-level bans and Sybil resistance, report-threshold weighting (one report restricts), headless-browser crawling, runtime-chunk coverage, attestations, appeals, and email notifications. The catalogue is 8 to 10 seeded real simulations plus Repo B, which is disclosed on stage as an educator stand-in we authored.
+  * Fallback labeling rule: any replayed result after a failed live check, including a replayed grade, carries a visible **CACHED** label and the original timestamp.
+- [DISCARDED_TECH_CHOICES_&_TRADE_OFFS]:
+  * Discarded Tech/Model: Entry-HTML-only scan and fingerprint (earlier iteration).
+  * Reason Discarded: simulation logic lives in JavaScript, so a changed `game.js` with identical HTML was invisible, and SPA shells hide hardcoded trackers in scripts.
+  * Selected Tech Advantage: fetch same-origin scripts through the same wrapper (capped, with an "unscanned" label for oversized bundles), hash them, and grep for tracker hostnames. This closes the same-name swap and many hardcoded JS trackers without a headless browser.
+  * Discarded Tech/Model: Random per-submission token issuance (earlier iteration).
+  * Reason Discarded: it needs server state, and a manifest committed before the event would have to resume a pre-created submission, which is a stage failure point.
+  * Selected Tech Advantage: a stateless HMAC token bound to numeric user ID, numeric repo ID, and normalized live URL can be derived on demand and verified any time.
+  * Discarded Tech/Model: Login-string ownership matching.
+  * Reason Discarded: logins can be renamed and later re-registered by someone else.
+  * Selected Tech Advantage: the numeric GitHub ID is stable and cannot be claimed by another account.
+  * Discarded Tech/Model: Supabase Realtime for tick animation.
+  * Reason Discarded: it adds a websocket dependency just to animate results.
+  * Selected Tech Advantage: six parallel client calls produce the same visible ticks with one less moving part.
+  * Discarded Tech/Model: Live OAuth on stage.
+  * Reason Discarded: redirects, consent screens, and 2FA are the loudest failure points of the demo. Supabase also does not persist provider tokens across refresh, so ownership uses the identity captured at sign-in with our PAT for repo reads.
+  * Selected Tech Advantage: a pre-authenticated session (second device as backup, plus a 10-second recorded sign-in clip) removes the failure while the real flow stays built. Tier 2 covers user-owned repos only.
+  * Discarded Tech/Model: Drift-demo target hosted on GitHub Pages.
+  * Reason Discarded: deploy lag and CDN caching can make re-verification report no change.
+  * Selected Tech Advantage: a separate-origin deployment with an instant toggle and `no-store` headers. It stays cross-origin, which keeps the sandbox reasoning intact.
+  * Discarded Tech/Model: A weighted numeric vetting score.
+  * Reason Discarded: arbitrary weights are indefensible in Q&A.
+  * Selected Tech Advantage: six pass/fail gates plus warnings can be inspected line by line.
+  * Discarded Tech/Model: LLM grading of scientific accuracy.
+  * Reason Discarded: it is unfalsifiable, as there is no ground truth to check a grader against, and it adds live-demo latency. Offline README tagging at seed time is the only kept use.
+  * Selected Tech Advantage: deterministic checks whose verdicts can be explained.
+  * Discarded Tech/Model: Automated repo build-and-run in sandboxes, Playwright crawling in Tier 2, and cron re-verification in Tier 2.
+  * Reason Discarded: orchestration, cold-start, and invisible-on-stage failure points that cannot be stabilized in 24 hours.
+  * Selected Tech Advantage: a static parse in seconds, and a manual button that runs the same code path on demand. The static scan's limits are disclosed in the UI.
+  * Discarded Tech/Model: Bare `sandbox="allow-scripts"`.
+  * Reason Discarded: the opaque origin breaks simulations that use storage or workers. Because the simulation is cross-origin to the hub, allowing its own origin does not weaken hub isolation.
+  * Selected Tech Advantage: `sandbox="allow-scripts allow-same-origin"` with no popups, top-navigation, or forms. Simulations keep working while redirect and popup abuse is blocked.
+  * Discarded Tech/Model: Kubernetes plus a dedicated search cluster for the demo.
+  * Reason Discarded: the setup overhead exceeds the value for a 10-entry catalogue.
+  * Selected Tech Advantage: a single deployable app with Postgres full-text search answering in under 200 ms at demo scale.
+
+[SEC_4_FEASIBILITY_AND_RISKS]
+- Tier 1 Enterprise Viability:
+  * Attributable and bannable, not identified. A GitHub account is a pseudonym, and a determined Sybil can re-enter under a new account. Bans on user ID, repo ID, and origin raise that cost, and Tier 1 institutional verification raises it further.
+  * Accountability is not benignity or accuracy. Benignity depends on the gates, sandboxing, and human review. Accuracy depends on educator accountability, reports, and takedown, with no automated accuracy claim.
+  * Cloaking cannot be fully eliminated, so the defense is layered: sandbox containment, auto-restrict on reports, multi-vantage re-crawls, and bans. Auto-restrict is griefable, so it is reversible and gets threshold weighting in Tier 1.
+  * SSRF risk is real for any service that fetches user URLs, so the wrapper runs in an egress-restricted segment in production. Moderator labor and crawl budget scale with catalogue size.
+  * Child safety: no learner accounts and no learner identifiers stored by the application. Infrastructure logs may contain IPs, so retention is minimized and legal review against the DPDP Act 2023 is required before production. G6 reduces known hardcoded trackers and is not a certification, and the interstitial says so. Adoption needs teacher onboarding and a short manifest spec.
+- Tier 2 Live Demo Risks:
+  * Staggered or failed gate ticks: six network-dependent calls (GitHub rate limits, Safe Browsing, venue Wi-Fi), cold starts, or the pre-authenticated session expiring.
+  * The 80-second learner loop: a slow iframe load or a mis-tap that loses the flip reveal, which is the only on-stage evidence for the learning claim.
+- Concrete Mitigations:
+  * Use a GitHub PAT, a 4 s timeout per check, and the T-60 s warm-up with 20 s keep-alives. Rehearse on venue Wi-Fi with a hotspot backup. Sign in on two devices shortly before the pitch and keep the recorded sign-in clip. Deploy and cache-warm Repo A, Repo B, and every seeded entry beforehand. Replays appear only on failure and are labeled **CACHED**.
+  * Run the stage flow with a stopwatch at least five times and use the demo reset script before each run. Preload the iframe during predictions. If it has not loaded within 3 s, the presenter opens the new-tab path or plays the recorded 10-second clip, and the post-test and flip still run. Use large answer targets and a fixed scripted answer sequence. Follow the cut order from Sec 2.
+
+[SEC_5_IMPACT_AND_BENEFITS]
+- Target Beneficiaries: School and college learners, educators and student developers publishing simulations, and admins or education departments needing vetted environmental content.
+- Quantifiable Metrics (only reported when measured):
+  * **Open item: the corpus run must be completed before submission.** Report only gates independent of our manifest, as "k of n repos", never percentages, with the largest real number first. Candidate lines: `[k of n: no OSI license]`, `[k of n: no live URL listed]`, `[k of n: dead or non-HTTPS live URL]`. Fill from the run.
+  * Safe Browsing and tracker hits are expected near zero on a static scan, so they are footnotes, not the opening.
+  * Pilot-only metrics: vetting latency p50 and p95, median admin decision time per entry against an unassisted baseline, and anonymous aggregate net flips per simulation, labeled client-reported, with sample size.
+  * On-stage flips are scripted, and they demonstrate the mechanism rather than learning gains.
+- Indian Context Fit: A lightweight frontend suited to low bandwidth, Hindi search first with regional languages planned, and free GitHub Pages hosting that suits under-resourced schools. No learner accounts and no learner identifiers stored by the application keeps data collected from minors minimal, and the loop aligns with NEP 2020 experiential-learning goals.
+
+[SEC_6_RESEARCH_AND_REFERENCES]
+- Research & Data: NEP 2020 (experiential learning), NCERT environmental science syllabus, UNESCO ESD for 2030, Digital Personal Data Protection Act 2023, research on stock-and-flow misconceptions about CO₂ accumulation (Sterman & Sweeney, 2007), and the pre-event corpus of public GitHub environmental-simulation repos (query, date, and list published with results).
+- Comparative Baselines: PhET Interactive Simulations, DIKSHA, NCERT e-Pathshala, Scratch and Wokwi community galleries, GitHub Pages education showcases.
+- Technical Baselines: Next.js, Supabase (Postgres, GitHub auth provider, RLS), GitHub REST API, Google Safe Browsing (Web Risk API for commercial use), SPDX and OSI license lists, Disconnect tracking-protection list and EasyPrivacy, HMAC (RFC 2104), HTML `sandbox` iframe attribute, `X-Frame-Options` and CSP `frame-ancestors`, OWASP SSRF prevention guidance, predict-observe-explain (White & Gunstone, 1992), GitHub Actions artifact attestations (Tier 1), and Playwright (Tier 1).
