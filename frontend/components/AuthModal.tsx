@@ -11,10 +11,6 @@ import {
   Mail,
   LogIn,
   UserPlus,
-  Settings,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
 } from "lucide-react";
 import {
   DEMO_USERS,
@@ -37,12 +33,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
-
-  // In-modal Supabase credentials setup
-  const [showConfigInputs, setShowConfigInputs] = useState(false);
-  const [inputUrl, setInputUrl] = useState("");
-  const [inputAnonKey, setInputAnonKey] = useState("");
-  const [savingConfig, setSavingConfig] = useState(false);
 
   if (!isOpen) return null;
 
@@ -177,34 +167,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   };
 
   // Save Supabase credentials directly to .env.local
-  const handleSaveSupabaseConfig = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingConfig(true);
-    setErrorMsg(null);
-    try {
-      const res = await fetch("/api/setup-supabase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          supabaseUrl: inputUrl,
-          supabaseAnonKey: inputAnonKey,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save configuration.");
-
-      setInfoMsg("Supabase credentials saved to .env.local! Reloading page to apply...");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1200);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setErrorMsg(msg);
-    } finally {
-      setSavingConfig(false);
-    }
-  };
-
   const handleSelectDemoProfile = (profile: UserProfile) => {
     onLoginSuccess(profile);
     onClose();
@@ -225,90 +187,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-rose-700 text-white shadow-lg shadow-red-600/30">
             <span className="text-xl font-black">▶</span>
           </div>
-          <h2 className="text-xl font-bold text-white pt-2">SimHub Authentication</h2>
+          <h2 className="text-xl font-bold text-white pt-2">Sign into SimHub EDU</h2>
           <p className="text-xs text-slate-400">
-            Centrally moderated simulation registry • Powered by Supabase
+            Browse, play, rate, and publish educational simulations
           </p>
         </div>
-
-        {/* Status Indicator */}
-        <div
-          className={`rounded-xl border p-2.5 text-xs flex items-center justify-between ${
-            isLiveSupabaseConfigured
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {isLiveSupabaseConfigured ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-            ) : (
-              <Sparkles className="h-4 w-4 text-cyan-400 shrink-0" />
-            )}
-            <span>
-              {isLiveSupabaseConfigured
-                ? "Live Supabase Cloud Connected"
-                : "Instant Demo Mode Ready"}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowConfigInputs(!showConfigInputs)}
-            className="text-[11px] font-semibold text-slate-300 hover:text-white underline flex items-center gap-0.5"
-          >
-            <span>{isLiveSupabaseConfigured ? "Configured" : "Connect Live Keys"}</span>
-            {showConfigInputs ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          </button>
-        </div>
-
-        {/* Expandable Live Supabase Credentials Input Form */}
-        {showConfigInputs && (
-          <form
-            onSubmit={handleSaveSupabaseConfig}
-            className="rounded-xl border border-slate-700 bg-slate-950 p-4 space-y-3 text-xs"
-          >
-            <div className="font-semibold text-white flex items-center gap-1.5">
-              <Settings className="h-3.5 w-3.5 text-cyan-400" />
-              <span>Connect Your Live Supabase Project</span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              Paste your Supabase credentials (from Supabase Dashboard &rarr; Project Settings &rarr; API).
-            </p>
-
-            <div>
-              <label className="text-slate-400 block mb-1">Project URL (NEXT_PUBLIC_SUPABASE_URL)</label>
-              <input
-                type="url"
-                required
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                placeholder="https://xyzcompany.supabase.co"
-                className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-white font-mono text-[11px] focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-slate-400 block mb-1">Anon Public Key (NEXT_PUBLIC_SUPABASE_ANON_KEY)</label>
-              <input
-                type="text"
-                required
-                value={inputAnonKey}
-                onChange={(e) => setInputAnonKey(e.target.value)}
-                placeholder="eyJhbGciOiJIUzI1NiIsIn..."
-                className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-white font-mono text-[11px] focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={savingConfig}
-              className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-colors"
-            >
-              {savingConfig ? "Saving..." : "Save to .env.local & Connect"}
-            </button>
-          </form>
-        )}
 
         {errorMsg && (
           <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-2.5 text-xs text-rose-300">

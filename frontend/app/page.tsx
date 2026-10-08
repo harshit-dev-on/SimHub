@@ -10,7 +10,6 @@ import { AuthModal } from "@/components/AuthModal";
 import { ProfileSetupModal } from "@/components/ProfileSetupModal";
 import { EducatorConsole } from "@/components/EducatorConsole";
 import { AdminQueue } from "@/components/AdminQueue";
-import { StageDemoHud } from "@/components/StageDemoHud";
 import { SimulationEntry } from "@/lib/store";
 import {
   DEMO_USERS,
@@ -38,7 +37,7 @@ export default function Home() {
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const [currentView, setCurrentView] = useState<"feed" | "watch" | "verify" | "admin" | "hud">("feed");
+  const [currentView, setCurrentView] = useState<"feed" | "watch" | "verify" | "admin">("feed");
   const [selectedSim, setSelectedSim] = useState<SimulationEntry | null>(null);
 
   const [simulations, setSimulations] = useState<SimulationEntry[]>([]);
@@ -47,7 +46,6 @@ export default function Home() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [hasMindChangedBadge, setHasMindChangedBadge] = useState(false);
-  const [isDriftActive, setIsDriftActive] = useState(false);
 
   // Restore session from localStorage on mount and sync with Supabase
   useEffect(() => {
@@ -147,7 +145,7 @@ export default function Home() {
     }
   };
 
-  // Load simulations catalogue and drift state
+  // Load simulations catalogue
   const loadData = async () => {
     try {
       const res = await fetch("/api/submissions");
@@ -155,10 +153,6 @@ export default function Home() {
       if (data.simulations) {
         setSimulations(data.simulations);
       }
-
-      const driftRes = await fetch("/api/mock-sim/repo-b/toggle-drift");
-      const driftData = await driftRes.json();
-      setIsDriftActive(driftData.driftActive ?? false);
     } catch (err) {
       console.error(err);
     }
@@ -189,31 +183,6 @@ export default function Home() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const handleResetDemo = async () => {
-    try {
-      await fetch("/api/demo/reset", { method: "POST" });
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("ecoverse_badge_mind_changed");
-      }
-      setIsDriftActive(false);
-      setRefreshTrigger((prev) => prev + 1);
-      alert("Demo state reset to pristine stage baseline. Repo B is clean and pending.");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleToggleDrift = async () => {
-    try {
-      const res = await fetch("/api/mock-sim/repo-b/toggle-drift", { method: "POST" });
-      const data = await res.json();
-      setIsDriftActive(data.driftActive);
-      setRefreshTrigger((prev) => prev + 1);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-red-600/30 selection:text-white">
       {/* YouTube Style Header */}
@@ -226,8 +195,6 @@ export default function Home() {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
         onGoHome={handleGoHome}
-        onOpenHud={() => setCurrentView("hud")}
-        onResetDemo={handleResetDemo}
         onOpenProfileSetup={() => {
           setIsFirstTimeSetup(false);
           setIsProfileSetupOpen(true);
@@ -244,7 +211,6 @@ export default function Home() {
           onGoHome={handleGoHome}
           onOpenUpload={() => setIsUploadModalOpen(true)}
           onOpenAdmin={() => setCurrentView("admin")}
-          onOpenHud={() => setCurrentView("hud")}
           onOpenEducatorVerify={() => setCurrentView("verify")}
           hasMindChangedBadge={hasMindChangedBadge}
         />
@@ -292,21 +258,6 @@ export default function Home() {
                   setRefreshTrigger((prev) => prev + 1);
                 }}
                 refreshTrigger={refreshTrigger}
-              />
-            </div>
-          )}
-
-          {currentView === "hud" && (
-            <div className="max-w-7xl mx-auto p-4 sm:p-6">
-              <StageDemoHud
-                onSwitchTab={(tab) => {
-                  if (tab === "learner") setCurrentView("feed");
-                  if (tab === "educator") setCurrentView("verify");
-                  if (tab === "admin") setCurrentView("admin");
-                }}
-                onResetDemo={handleResetDemo}
-                isDriftActive={isDriftActive}
-                onToggleDrift={handleToggleDrift}
               />
             </div>
           )}

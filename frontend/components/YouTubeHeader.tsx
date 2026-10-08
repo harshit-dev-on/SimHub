@@ -26,8 +26,6 @@ interface YouTubeHeaderProps {
   onOpenAuth: () => void;
   onLogout: () => void;
   onGoHome: () => void;
-  onOpenHud: () => void;
-  onResetDemo: () => void;
   onOpenProfileSetup: () => void;
 }
 
@@ -40,8 +38,6 @@ export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
   onOpenAuth,
   onLogout,
   onGoHome,
-  onOpenHud,
-  onResetDemo,
   onOpenProfileSetup,
 }) => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -104,23 +100,10 @@ export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
         {/* Upload Simulation Button */}
         <button
           onClick={onOpenUpload}
-          className="flex items-center gap-1.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition-all shadow-sm"
+          className="flex items-center gap-1.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-1.5 text-xs font-semibold text-white transition-all shadow-sm"
         >
           <Plus className="h-4 w-4 text-emerald-400" />
           <span className="hidden md:inline">Upload Sim</span>
-        </button>
-
-        {/* Demo HUD shortcut */}
-        <button
-          onClick={onOpenHud}
-          title="Stage Rehearsal HUD"
-          className="hidden sm:flex items-center gap-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-500/20"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-          </span>
-          <span>Stage HUD</span>
         </button>
 
         {/* Bell notifications */}
@@ -152,7 +135,7 @@ export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
                   <div className="font-bold text-white">{user.name}</div>
                   <div className="text-[11px] text-slate-400 truncate">{user.email}</div>
                   <div className="mt-1 text-[10px] font-mono text-emerald-400">
-                    GitHub ID: #{user.numericId}
+                    ID: #{user.numericId}
                   </div>
                 </div>
 
@@ -177,28 +160,6 @@ export const YouTubeHeader: React.FC<YouTubeHeaderProps> = ({
                   >
                     <Plus className="h-4 w-4" />
                     <span>Upload New Simulation</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      onOpenHud();
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-slate-800 hover:text-white"
-                  >
-                    <Layers className="h-4 w-4" />
-                    <span>Stage Demo Pitch HUD</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      onResetDemo();
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-slate-800 hover:text-white"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    <span>Reset Stage Demo State</span>
                   </button>
                 </div>
 

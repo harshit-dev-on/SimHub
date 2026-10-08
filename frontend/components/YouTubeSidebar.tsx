@@ -26,7 +26,6 @@ interface YouTubeSidebarProps {
   onGoHome: () => void;
   onOpenUpload: () => void;
   onOpenAdmin: () => void;
-  onOpenHud: () => void;
   onOpenEducatorVerify: () => void;
   hasMindChangedBadge: boolean;
 }
@@ -38,7 +37,6 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
   onGoHome,
   onOpenUpload,
   onOpenAdmin,
-  onOpenHud,
   onOpenEducatorVerify,
   hasMindChangedBadge,
 }) => {
@@ -175,7 +173,7 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
       {/* Security & Verification Tools */}
       <div className="space-y-1">
         <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-          Moderation &amp; Stage
+          Creator Studio
         </div>
 
         <button
@@ -183,7 +181,7 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
           className="w-full flex items-center gap-3.5 px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-900 hover:text-white transition-colors"
         >
           <ShieldCheck className="h-4 w-4 text-cyan-400" />
-          <span>6-Gate Verifier</span>
+          <span>Security &amp; Gates</span>
         </button>
 
         <button
@@ -192,17 +190,6 @@ export const YouTubeSidebar: React.FC<YouTubeSidebarProps> = ({
         >
           <Layers className="h-4 w-4 text-amber-400" />
           <span>Moderator Queue</span>
-        </button>
-
-        <button
-          onClick={onOpenHud}
-          className="w-full flex items-center gap-3.5 px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-900 hover:text-white transition-colors"
-        >
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-          </span>
-          <span>Stage 3-Min HUD</span>
         </button>
       </div>
     </aside>
