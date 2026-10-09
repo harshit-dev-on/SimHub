@@ -144,6 +144,10 @@ export const WatchView: React.FC<WatchViewProps> = ({
   };
 
   const handlePostVote = (dir: "up" | "down") => {
+    if (!user) {
+      alert("Please sign in to vote on simulations.");
+      return;
+    }
     const currentVote = postVote;
     if (postVote === dir) {
       setPostVote(null);

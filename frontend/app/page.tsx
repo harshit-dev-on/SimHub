@@ -253,7 +253,7 @@ export default function Home() {
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        onOpenUpload={() => setIsUploadModalOpen(true)}
+        onOpenUpload={() => user ? setIsUploadModalOpen(true) : setIsAuthModalOpen(true)}
         user={user}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
@@ -273,7 +273,7 @@ export default function Home() {
           setActiveTopic={setSelectedTopic}
           onGoHome={handleGoHome}
           onOpenSubscriptions={() => setCurrentView("subscriptions")}
-          onOpenUpload={() => setIsUploadModalOpen(true)}
+          onOpenUpload={() => user ? setIsUploadModalOpen(true) : setIsAuthModalOpen(true)}
           onOpenAdmin={() => setCurrentView("admin")}
           onOpenEducatorVerify={() => setCurrentView("verify")}
           currentView={currentView}

@@ -74,6 +74,10 @@ export const RedditCommentsSection: React.FC<RedditCommentsSectionProps> = ({
 
   // Voting handler for any comment in the recursive tree
   const handleVote = (commentId: string, direction: "up" | "down") => {
+    if (!user) {
+      alert("Please sign in to vote on comments.");
+      return;
+    }
     let targetCurrentVote: "up" | "down" | null = null;
     const updateRecursive = (list: SimulationComment[]): SimulationComment[] => {
       return list.map((c) => {
@@ -131,6 +135,10 @@ export const RedditCommentsSection: React.FC<RedditCommentsSectionProps> = ({
 
   // Add a reply to a specific comment
   const handleAddReply = (parentId: string, replyText: string) => {
+    if (!user) {
+      alert("Please sign in to reply to comments.");
+      return;
+    }
     if (!replyText.trim()) return;
 
     const newReply: SimulationComment = {
@@ -195,6 +203,10 @@ export const RedditCommentsSection: React.FC<RedditCommentsSectionProps> = ({
   // Add top-level comment
   const handleAddTopComment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      alert("Please sign in to post a comment.");
+      return;
+    }
     if (!newCommentText.trim()) return;
 
     const newComment: SimulationComment = {
