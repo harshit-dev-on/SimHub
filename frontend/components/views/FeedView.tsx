@@ -4,7 +4,6 @@ import React from "react";
 import {
   Play,
   CheckCircle2,
-  ShieldCheck,
   Users,
   ChevronRight,
 } from "lucide-react";
@@ -320,12 +319,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
       </div>
 
       {/* Bottom Telemetry */}
-      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-slate-600">
-        <div className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-          <span>6/6 Gates</span>
-        </div>
-
+      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-end text-[10px] sm:text-[11px] font-semibold text-slate-600">
         <div className="flex items-center gap-1 text-slate-500">
           <Users className="h-3 w-3 text-slate-400" />
           <span>{activeLearners} active</span>
