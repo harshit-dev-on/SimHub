@@ -36,12 +36,13 @@ function saveLocalUserSimulations(sims: SimulationEntry[]): void {
       }
       fs.writeFileSync(p, JSON.stringify(sims, null, 2), "utf-8");
     }
-  } catch {
-    // Vercel / read-only filesystem
+  } catch (err) {
+    console.error("Failed to save local user simulations:", err);
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const _forceDynamic = req.url;
   try {
     const localSims = loadLocalUserSimulations();
     if (localSims.length > 0) {

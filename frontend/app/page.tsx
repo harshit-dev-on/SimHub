@@ -143,7 +143,7 @@ export default function Home() {
   // Load simulations catalogue with localStorage persistence
   const loadData = async () => {
     try {
-      const res = await fetch("/api/submissions");
+      const res = await fetch("/api/submissions", { cache: "no-store" });
       const data = await res.json();
       let catalogue: SimulationEntry[] = Array.isArray(data.simulations) ? data.simulations : [];
 
