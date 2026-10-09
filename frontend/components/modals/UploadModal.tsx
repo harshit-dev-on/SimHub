@@ -97,6 +97,21 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     }
   };
 
+  const handleLocalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const result = ev.target?.result as string;
+        if (result) {
+          setScreenshotUrls((prev) => [...prev, result]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = "";
+  };
+
   const handleRemoveScreenshot = (idx: number) => {
     setScreenshotUrls(screenshotUrls.filter((_, i) => i !== idx));
   };
@@ -461,22 +476,34 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 ))}
               </div>
 
-              {/* Add Custom URL */}
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="url"
-                  value={customScreenshotInput}
-                  onChange={(e) => setCustomScreenshotInput(e.target.value)}
-                  placeholder="Paste direct image URL for simulation screenshot..."
-                  className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none font-mono text-[11px]"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddCustomScreenshot}
-                  className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white font-medium"
-                >
-                  Add Image
-                </button>
+              {/* Add Custom URL / File */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                <div className="flex flex-1 gap-2">
+                  <input
+                    type="url"
+                    value={customScreenshotInput}
+                    onChange={(e) => setCustomScreenshotInput(e.target.value)}
+                    placeholder="Paste direct image URL for simulation screenshot..."
+                    className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none font-mono text-[11px]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomScreenshot}
+                    className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white font-medium"
+                  >
+                    Add URL
+                  </button>
+                </div>
+                <label className="cursor-pointer px-3 py-2 rounded-xl border border-cyan-800/60 bg-cyan-900/20 text-cyan-400 hover:bg-cyan-900/40 hover:text-white font-medium transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <FolderUp className="h-3.5 w-3.5" />
+                  Upload File
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLocalImageUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
 
               {/* Thumbnails Row */}
