@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
+    syncLoadStore();
     const { id, reason } = await req.json();
     const sim = store.getSimulation(id);
 
@@ -13,6 +15,7 @@ export async function POST(req: NextRequest) {
     sim.status = "restricted";
     sim.statusReason = reason || "Restricted by Administrator";
 
+    syncSaveStore();
     return NextResponse.json({
       success: true,
       simulation: sim,

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string; commentId: string }> }
 ) {
   try {
+    syncLoadStore();
     const { id, commentId } = await context.params;
     const body = await req.json();
     const { direction, currentVote } = body;
@@ -20,6 +22,7 @@ export async function POST(
       return NextResponse.json({ error: "Simulation or comment not found" }, { status: 404 });
     }
 
+    syncSaveStore();
     return NextResponse.json({
       success: true,
       commentId,

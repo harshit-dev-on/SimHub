@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store, GateResult } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    syncLoadStore();
     const { id } = await context.params;
     const sim = store.getSimulation(id);
 
@@ -64,6 +66,7 @@ export async function POST(
       // Auto-restrict on hard-fail (e.g. tracker domain found or token missing)
       sim.status = "restricted";
       sim.statusReason = `Drift Hard-Fail: ${failedGate.name} failed (${failedGate.statusText})`;
+      syncSaveStore();
       return NextResponse.json({
         outcome: "auto_restricted",
         reason: sim.statusReason,
@@ -89,6 +92,7 @@ export async function POST(
     if (contentChanged) {
       sim.status = "drift_flagged";
       sim.statusReason = "Content modified: Entry script or HTML hash differs from approved fingerprint";
+      syncSaveStore();
       return NextResponse.json({
         outcome: "re_queued",
         reason: sim.statusReason,
@@ -100,6 +104,7 @@ export async function POST(
     sim.status = "approved";
     sim.statusReason = "Re-verified: All 6 gates passed and cryptographic fingerprint matches approved baseline.";
 
+    syncSaveStore();
     return NextResponse.json({
       outcome: "clean",
       reason: sim.statusReason,

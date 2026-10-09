@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    syncLoadStore();
     const { id } = await context.params;
     const sim = store.getSimulation(id);
 
@@ -28,6 +30,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    syncLoadStore();
     const { id } = await context.params;
     const sim = store.getSimulation(id);
 
@@ -51,6 +54,7 @@ export async function POST(
       parentId,
     });
 
+    syncSaveStore();
     return NextResponse.json({
       success: true,
       comment: newComment,

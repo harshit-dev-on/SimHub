@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    syncLoadStore();
     const { userId } = await params;
     if (!userId) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
@@ -27,6 +29,7 @@ export async function POST(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    syncLoadStore();
     const { userId } = await params;
     if (!userId) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
@@ -37,6 +40,7 @@ export async function POST(
 
     if (Array.isArray(subscriptions)) {
       const updated = store.setUserSubscriptions(userId, subscriptions);
+      syncSaveStore();
       return NextResponse.json({ userId, subscriptions: updated });
     }
 
@@ -48,6 +52,7 @@ export async function POST(
     }
 
     const result = store.toggleUserSubscription(userId, authorName.trim());
+    syncSaveStore();
     return NextResponse.json({
       userId,
       isSubscribed: result.isSubscribed,

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 import { sha256 } from "@/lib/crypto";
 
 export async function POST(req: NextRequest) {
   try {
+    syncLoadStore();
     const { id, gates } = await req.json();
     const sim = store.getSimulation(id);
 
@@ -28,6 +30,7 @@ export async function POST(req: NextRequest) {
     sim.statusReason = "Approved by Moderator after passing all 6 hard gates";
     sim.gates = gates;
 
+    syncSaveStore();
     return NextResponse.json({
       success: true,
       simulation: sim,

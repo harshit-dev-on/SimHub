@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    syncLoadStore();
     const { id } = await context.params;
     const sim = store.getSimulation(id);
 
@@ -17,6 +19,7 @@ export async function POST(
     sim.status = "restricted";
     sim.statusReason = "Auto-restricted pending review: Learner report filed (fails closed)";
 
+    syncSaveStore();
     return NextResponse.json({
       success: true,
       message: "Simulation auto-restricted from public search pending administrative review.",

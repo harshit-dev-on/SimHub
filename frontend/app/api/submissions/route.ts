@@ -1,55 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store, SimulationEntry } from "@/lib/store";
-import fs from "fs";
-import path from "path";
-
-function getLocalDataPath(): string | null {
-  try {
-    const dataDir = path.join(process.cwd(), "data");
-    return path.join(dataDir, "user_simulations.json");
-  } catch {
-    return null;
-  }
-}
-
-function loadLocalUserSimulations(): SimulationEntry[] {
-  try {
-    const p = getLocalDataPath();
-    if (p && fs.existsSync(p)) {
-      const raw = fs.readFileSync(p, "utf-8");
-      const list = JSON.parse(raw);
-      if (Array.isArray(list)) return list;
-    }
-  } catch {
-    // Read-only filesystem or parse error
-  }
-  return [];
-}
-
-function saveLocalUserSimulations(sims: SimulationEntry[]): void {
-  try {
-    const p = getLocalDataPath();
-    if (p) {
-      const dir = path.dirname(p);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(p, JSON.stringify(sims, null, 2), "utf-8");
-    }
-  } catch (err) {
-    console.error("Failed to save local user simulations:", err);
-  }
-}
+import { syncLoadStore, syncSaveStore } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
-  const _forceDynamic = req.url;
   try {
-    const localSims = loadLocalUserSimulations();
-    if (localSims.length > 0) {
-      const localIds = new Set(localSims.map((s) => s.id));
-      const nonLocal = store.simulations.filter((s) => !localIds.has(s.id));
-      store.simulations = [...localSims, ...nonLocal];
-    }
+    syncLoadStore();
   } catch {
     // Ignore in edge / serverless
   }
@@ -61,6 +16,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    syncLoadStore();
     const body = await req.json();
     const {
       id,
@@ -123,13 +79,7 @@ export async function POST(req: NextRequest) {
       store.simulations.unshift(newSim);
     }
 
-    // Persist to local JSON file for Node.js / dev server
-    try {
-      const currentLocal = loadLocalUserSimulations().filter((s) => s.id !== newSim.id);
-      saveLocalUserSimulations([newSim, ...currentLocal]);
-    } catch {
-      // Ignore
-    }
+    syncSaveStore();
 
     return NextResponse.json({
       success: true,
@@ -143,6 +93,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    syncLoadStore();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) {
@@ -151,14 +102,9 @@ export async function DELETE(req: NextRequest) {
 
     store.simulations = store.simulations.filter((s) => s.id !== id);
 
-    try {
-      const currentLocal = loadLocalUserSimulations().filter((s) => s.id !== id);
-      saveLocalUserSimulations(currentLocal);
-    } catch {
-      // Ignore
-    }
+    syncSaveStore();
 
-    return NextResponse.json({ success: true, id });
+    return NextResponse.json({ success: true });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 400 });
