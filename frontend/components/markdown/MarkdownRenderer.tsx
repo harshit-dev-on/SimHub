@@ -9,15 +9,25 @@ export interface MarkdownRendererProps {
 }
 
 // Helper to parse inline elements: bold, italic, inline code, links, strikethrough
-function renderInline(text: string): React.ReactNode[] {
+function renderInline(rawText: string): React.ReactNode[] {
+  // Pre-process HTML tags into markdown and strip raw structural elements
+  const text = rawText
+    .replace(/<b[^>]*>(.*?)<\/b>/gi, "**$1**")
+    .replace(/<strong[^>]*>(.*?)<\/strong>/gi, "**$1**")
+    .replace(/<i[^>]*>(.*?)<\/i>/gi, "*$1*")
+    .replace(/<em[^>]*>(.*?)<\/em>/gi, "*$1*")
+    .replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`")
+    .replace(/<\/?(?:div|p|span|br|hr)[^>]*>/gi, "");
+
   const elements: React.ReactNode[] = [];
   // Regex to match inline patterns:
   // 1: `code`
   // 2: **bold** or __bold__
   // 3: *italic* or _italic_
   // 4: ~~strike~~
-  // 5: [text](url)
-  const regex = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|~~[^~]+~~|\[[^\]]+\]\([^)]+\))/g;
+  // 5: ![alt](url)
+  // 6: [text](url)
+  const regex = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|~~[^~]+~~|!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\))/g;
 
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -62,6 +72,19 @@ function renderInline(text: string): React.ReactNode[] {
         <del key={key} className="line-through text-slate-400">
           {token.slice(2, -2)}
         </del>
+      );
+    } else if (token.startsWith("![") && token.includes("](")) {
+      const splitIdx = token.indexOf("](");
+      const altText = token.slice(2, splitIdx);
+      const imgUrl = token.slice(splitIdx + 2, -1);
+      elements.push(
+        <img
+          key={key}
+          src={imgUrl}
+          alt={altText}
+          className="max-w-full rounded-lg shadow-sm border border-slate-200 my-2"
+          loading="lazy"
+        />
       );
     } else if (token.startsWith("[") && token.includes("](")) {
       const splitIdx = token.indexOf("](");
