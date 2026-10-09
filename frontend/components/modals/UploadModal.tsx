@@ -98,16 +98,18 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   };
 
   const handleLocalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const result = ev.target?.result as string;
-        if (result) {
-          setScreenshotUrls((prev) => [...prev, result]);
-        }
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const result = ev.target?.result as string;
+          if (result) {
+            setScreenshotUrls((prev) => [...prev, result]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
     e.target.value = "";
   };
@@ -500,6 +502,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleLocalImageUpload}
                     className="hidden"
                   />
