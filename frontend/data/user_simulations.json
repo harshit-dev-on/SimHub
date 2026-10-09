@@ -1,0 +1,29 @@
+[
+  {
+    "id": "test-sim-1",
+    "title": "Test Simulation",
+    "description": "Testing API",
+    "topic": "Physics",
+    "gradeLevel": "High School / College",
+    "repoUrl": "",
+    "liveUrl": "",
+    "authorLogin": "creator",
+    "authorName": "Community Contributor",
+    "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "authorNumericId": 9841234,
+    "repoNumericId": 53141019,
+    "license": "MIT",
+    "status": "approved",
+    "warnings": [],
+    "observationPrompt": "Observe how key control parameters affect steady-state equilibrium.",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1509391365360-2e959784a276?w=640&auto=format&fit=crop&q=80",
+    "screenshots": [],
+    "views": "1 learner",
+    "viewsCount": 1,
+    "uploadedAt": "Just now",
+    "durationLabel": "Interactive Sim",
+    "reportsCount": 0,
+    "isUserUploaded": true,
+    "comments": []
+  }
+]
