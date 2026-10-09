@@ -17,6 +17,8 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
   const [loading, setLoading] = useState(true);
   const [reverifyingId, setReverifyingId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [hidingId, setHidingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   const fetchQueue = async () => {
@@ -78,6 +80,45 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
       console.error(err);
     } finally {
       setReverifyingId(null);
+    }
+  };
+
+  const handleHide = async (sim: SimulationEntry) => {
+    setHidingId(sim.id);
+    try {
+      const res = await fetch("/api/admin/restrict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: sim.id, reason: "Hidden by Administrator" }),
+      });
+      if (res.ok) {
+        setActionNotice(`Hidden "${sim.title}". It will no longer appear in public search.`);
+        fetchQueue();
+        onQueueUpdated();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setHidingId(null);
+    }
+  };
+
+  const handleDelete = async (sim: SimulationEntry) => {
+    if (!confirm(`Are you sure you want to permanently delete "${sim.title}"?`)) return;
+    setDeletingId(sim.id);
+    try {
+      const res = await fetch(`/api/submissions?id=${encodeURIComponent(sim.id)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setActionNotice(`Deleted "${sim.title}" from the database.`);
+        fetchQueue();
+        onQueueUpdated();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -196,6 +237,24 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${reverifyingId === sim.id ? "animate-spin" : ""}`} />
                     <span>{reverifyingId === sim.id ? "Auditing Live Gates..." : "Re-Verify Now"}</span>
+                  </button>
+
+                  {sim.status !== "restricted" && (
+                    <button
+                      onClick={() => handleHide(sim)}
+                      disabled={hidingId === sim.id}
+                      className="px-4 py-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold text-xs hover:bg-amber-500/20 transition-all"
+                    >
+                      {hidingId === sim.id ? "Hiding..." : "Hide"}
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleDelete(sim)}
+                    disabled={deletingId === sim.id}
+                    className="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 font-bold text-xs hover:bg-rose-500/20 transition-all"
+                  >
+                    {deletingId === sim.id ? "Deleting..." : "Delete"}
                   </button>
 
                   <a
