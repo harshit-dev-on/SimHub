@@ -69,14 +69,6 @@ export const SimulationWorkbench: React.FC<SimulationWorkbenchProps> = ({
 
         {/* Workbench Tools */}
         <div className="flex items-center gap-2">
-          {/* POE Inquiry Challenge Button */}
-          <button
-            onClick={() => setShowPoeModal(true)}
-            className="flex items-center gap-2 rounded-full bg-slate-950 hover:bg-slate-900 text-white px-4 py-1.5 text-xs font-semibold shadow-sm transition-all"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span>Launch POE Challenge</span>
-          </button>
 
           {/* Reload Sandbox */}
           <button

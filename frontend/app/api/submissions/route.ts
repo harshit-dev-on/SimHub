@@ -111,7 +111,6 @@ export async function POST(req: NextRequest) {
       durationLabel: durationLabel || "Interactive Sim",
       reportsCount: 0,
       isUserUploaded: true,
-      questions: body.questions || [],
       comments: body.comments || [],
     };
 

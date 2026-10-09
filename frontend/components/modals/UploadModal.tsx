@@ -155,7 +155,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         reportsCount: 0,
         isUserUploaded: true,
         comments: [],
-        questions: [],
       };
 
       // 1. Register in backend store
