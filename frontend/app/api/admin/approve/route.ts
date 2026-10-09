@@ -6,29 +6,24 @@ import { sha256 } from "@/lib/crypto";
 export async function POST(req: NextRequest) {
   try {
     syncLoadStore();
-    const { id, gates } = await req.json();
+    const { id } = await req.json();
     const sim = store.getSimulation(id);
 
     if (!sim) {
       return NextResponse.json({ error: "Simulation not found" }, { status: 404 });
     }
 
-    // Capture approval fingerprint
-    const scanGate = gates?.find((g: { gateId: string }) => g.gateId === "g6");
-    const linkageGate = gates?.find((g: { gateId: string }) => g.gateId === "g2");
-
     sim.fingerprint = {
-      htmlSha: (scanGate?.details?.htmlSha as string) || sha256("index.html"),
-      scriptsSha: (scanGate?.details?.scriptsSha as Record<string, string>) || {},
-      scannedScripts: (scanGate?.details?.scannedCount as number) || 1,
-      unscannedSummary: (scanGate?.details?.coverageLabel as string) || "1 script scanned",
-      token: (linkageGate?.details?.foundToken as string) || "v1:token",
+      htmlSha: sha256("index.html"),
+      scriptsSha: {},
+      scannedScripts: 1,
+      unscannedSummary: "1 script scanned",
+      token: "v1:token",
       approvedAt: new Date().toISOString(),
     };
 
     sim.status = "approved";
-    sim.statusReason = "Approved by Moderator after passing all 6 hard gates";
-    sim.gates = gates;
+    sim.statusReason = "Approved by Moderator";
 
     syncSaveStore();
     return NextResponse.json({

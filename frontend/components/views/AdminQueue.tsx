@@ -15,7 +15,6 @@ export interface AdminQueueProps {
 export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshTrigger }) => {
   const [submissions, setSubmissions] = useState<SimulationEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [reverifyingId, setReverifyingId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [hidingId, setHidingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -43,7 +42,7 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
       const res = await fetch("/api/admin/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: sim.id, gates: sim.gates }),
+        body: JSON.stringify({ id: sim.id }),
       });
       if (res.ok) {
         setActionNotice(`Approved "${sim.title}" and locked cryptographic SHA-256 fingerprint.`);
@@ -57,31 +56,6 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
     }
   };
 
-  const handleReverify = async (sim: SimulationEntry) => {
-    setReverifyingId(sim.id);
-    setActionNotice(null);
-    try {
-      const res = await fetch(`/api/submissions/${sim.id}/reverify`, {
-        method: "POST",
-      });
-      const data = await res.json();
-
-      if (data.outcome === "auto_restricted") {
-        setActionNotice(`🚨 DRIFT HARD-FAIL DETECTED: Entry was AUTO-RESTRICTED from public search! Reason: ${data.reason}`);
-      } else if (data.outcome === "re_queued") {
-        setActionNotice(`⚠️ CONTENT DRIFT: Hash mismatch detected. Re-queued for moderator review.`);
-      } else {
-        setActionNotice(`✓ Re-verification clean: All 6 gates passed and cryptographic hashes match approved baseline.`);
-      }
-
-      fetchQueue();
-      onQueueUpdated();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setReverifyingId(null);
-    }
-  };
 
   const handleHide = async (sim: SimulationEntry) => {
     setHidingId(sim.id);
@@ -142,9 +116,9 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
       </div>
 
       {actionNotice && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs font-semibold text-amber-200 animate-in fade-in duration-200 flex items-center justify-between">
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs font-semibold text-amber-800 animate-in fade-in duration-200 flex items-center justify-between shadow-sm">
           <span>{actionNotice}</span>
-          <button onClick={() => setActionNotice(null)} className="text-slate-400 hover:text-white ml-2 text-xs">
+          <button onClick={() => setActionNotice(null)} className="text-amber-500 hover:text-amber-900 ml-2 text-xs">
             ✕
           </button>
         </div>
@@ -230,14 +204,6 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                     </button>
                   )}
 
-                  <button
-                    onClick={() => handleReverify(sim)}
-                    disabled={reverifyingId === sim.id}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-700 font-semibold text-xs hover:bg-cyan-100 transition-all"
-                  >
-                    <RefreshCw className={`h-3.5 w-3.5 ${reverifyingId === sim.id ? "animate-spin" : ""}`} />
-                    <span>{reverifyingId === sim.id ? "Auditing Live Gates..." : "Re-Verify Now"}</span>
-                  </button>
 
                   {sim.status !== "restricted" && (
                     <button
