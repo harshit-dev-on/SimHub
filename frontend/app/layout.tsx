@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     "Interactive STEM discovery studio and simulation registry for physics, mathematics, and environmental science with predict-observe-explain loops.",
 };
 
+import { I18nProvider } from "@/lib/i18n";
+
 export default function RootLayout({
   children,
 }: {
@@ -29,7 +31,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F1F3F5] text-slate-900 selection:bg-rose-500/20 selection:text-rose-900 font-sans">
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

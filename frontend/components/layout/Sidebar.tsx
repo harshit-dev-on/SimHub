@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { UserProfile } from "@/lib/supabase";
+import { useTranslation } from "@/lib/i18n";
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -42,13 +43,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentView = "feed",
   user,
 }) => {
+  const { t } = useTranslation();
+
   const TOPIC_ITEMS = [
-    { name: "All", label: "All Subjects", icon: Compass },
-    { name: "Physics", label: "Physics", icon: Atom },
-    { name: "Mathematics", label: "Mathematics", icon: Calculator },
-    { name: "Computer Science", label: "Computer Science", icon: Cpu },
-    { name: "Chemistry", label: "Chemistry", icon: FlaskConical },
-    { name: "Biology", label: "Biology", icon: Dna },
+    { name: "All", label: t.all, icon: Compass },
+    { name: "Physics", label: t.physics, icon: Atom },
+    { name: "Mathematics", label: t.math, icon: Calculator },
+    { name: "Computer Science", label: t.cs, icon: Cpu },
+    { name: "Chemistry", label: t.chemistry, icon: FlaskConical },
+    { name: "Biology", label: t.biology, icon: Dna },
     { name: "Environmental Science", label: "Environmental Science", icon: Globe },
   ];
 
@@ -65,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`}
         >
           <Home className="h-5 w-5" />
-          <span>Home</span>
+          <span>{t.home}</span>
         </button>
 
         <button
@@ -78,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           title="Subscriptions"
         >
           <Users className="h-5 w-5" />
-          <span>Subscriptions</span>
+          <span>{t.subscriptions}</span>
         </button>
 
         <button
@@ -121,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`}
         >
           <Home className="h-4 w-4 text-red-600" />
-          <span>Home Feed</span>
+          <span>{t.home}</span>
         </button>
 
         <button
@@ -133,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`}
         >
           <Users className="h-4 w-4 text-red-600" />
-          <span>Subscriptions</span>
+          <span>{t.subscriptions}</span>
         </button>
       </div>
 
@@ -181,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full flex items-center gap-3.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition-colors cursor-pointer"
         >
           <ShieldCheck className="h-4 w-4 text-emerald-600" />
-          <span>Security &amp; Gates</span>
+          <span>{t.verify}</span>
         </button>
 
         {user?.role === "admin" && (
@@ -195,7 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <div className="flex items-center gap-3.5">
               <Layers className="h-4 w-4 text-amber-600" />
-              <span>Admin Queue</span>
+              <span>{t.admin}</span>
             </div>
             <span className="text-[9px] font-mono font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">
               ADMIN

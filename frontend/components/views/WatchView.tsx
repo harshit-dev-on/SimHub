@@ -20,6 +20,7 @@ import {
 import { SimulationEntry } from "@/lib/store";
 import { RedditCommentsSection } from "@/components/comments/RedditCommentsSection";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
+import { useTranslation } from "@/lib/i18n";
 
 export interface WatchViewProps {
   simulation: SimulationEntry;
@@ -34,6 +35,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
   onReportSimulation,
   user,
 }) => {
+  const { t } = useTranslation();
 
   const [iframeKey, setIframeKey] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -197,7 +199,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
                 >
                   <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                     <Play className="h-4 w-4 fill-white" />
-                    <span>Launch</span>
+                    <span>{t.watchLaunch}</span>
                   </div>
                 </a>
                 

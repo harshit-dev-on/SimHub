@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
 import { UserProfile } from "@/lib/supabase";
+import { useTranslation } from "@/lib/i18n";
 
 export interface FeedViewProps {
   simulations: SimulationEntry[];
@@ -37,6 +38,8 @@ export const FeedView: React.FC<FeedViewProps> = ({
   onSelectSimulation,
   searchQuery,
 }) => {
+  const { t } = useTranslation();
+
   const approvedSims = simulations.filter(
     (s) => s.status === "approved" || s.isUserUploaded || !s.status
   );
@@ -142,7 +145,7 @@ export const FeedView: React.FC<FeedViewProps> = ({
               }`}
             >
               <span>{topic.icon}</span>
-              <span>{topic.label}</span>
+              <span>{topic.name === "All" ? t.all : topic.name === "Physics" ? t.physics : topic.name === "Mathematics" ? t.math : topic.name === "Chemistry" ? t.chemistry : topic.name === "Computer Science" ? t.cs : topic.name === "Biology" ? t.biology : topic.label}</span>
             </button>
           );
         })}
@@ -152,9 +155,9 @@ export const FeedView: React.FC<FeedViewProps> = ({
       {searchQuery || selectedTopic !== "All" ? (
         filtered.length === 0 ? (
           <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center space-y-2 shadow-xs">
-            <p className="text-sm font-bold text-slate-800">No simulations found.</p>
+            <p className="text-sm font-bold text-slate-800">{t.noSimsFound}</p>
             <p className="text-xs text-slate-500">
-              Try choosing &ldquo;All Subjects&rdquo; or clearing your search.
+              {t.tryClearingSearch}
             </p>
           </div>
         ) : (
@@ -174,13 +177,13 @@ export const FeedView: React.FC<FeedViewProps> = ({
           <section className="space-y-2.5">
             <div className="flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                Continue
+                {t.continueSims}
               </h2>
               <button
                 onClick={() => setSelectedTopic("All")}
                 className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
               >
-                <span>See All</span>
+                <span>{t.seeAll}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -200,13 +203,13 @@ export const FeedView: React.FC<FeedViewProps> = ({
           <section className="space-y-2.5">
             <div className="flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                Popular &amp; Trending
+                {t.trending}
               </h2>
               <button
                 onClick={() => setSelectedTopic("All")}
                 className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
               >
-                <span>See All</span>
+                <span>{t.seeAll}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -226,13 +229,13 @@ export const FeedView: React.FC<FeedViewProps> = ({
           <section className="space-y-2.5">
             <div className="flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                Top Rated
+                {t.topRated}
               </h2>
               <button
                 onClick={() => setSelectedTopic("All")}
                 className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
               >
-                <span>See All</span>
+                <span>{t.seeAll}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
