@@ -4,7 +4,6 @@ import React from "react";
 import {
   Home,
   Compass,
-  Award,
   ShieldCheck,
   Layers,
   Atom,
@@ -27,7 +26,6 @@ export interface SidebarProps {
   onOpenUpload?: () => void;
   onOpenAdmin: () => void;
   onOpenEducatorVerify: () => void;
-  hasMindChangedBadge: boolean;
   currentView?: string;
   user?: UserProfile | null;
 }
@@ -41,7 +39,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenUpload,
   onOpenAdmin,
   onOpenEducatorVerify,
-  hasMindChangedBadge,
   currentView = "feed",
   user,
 }) => {
@@ -170,25 +167,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-      <div className="border-t border-slate-200/80 my-1"></div>
-
-      {/* Badges / Achievements */}
-      <div className="space-y-1">
-        <div className="px-3 py-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-          Learning Badges
-        </div>
-        <div className="px-3 py-2 rounded-xl bg-[#FEF9C3]/80 border border-[#FDE68A] space-y-1.5 shadow-2xs">
-          <div className="flex items-center gap-2">
-            <Award className="h-4 w-4 text-amber-600" />
-            <span className="font-bold text-amber-950">Mind Changed</span>
-          </div>
-          <p className="text-[10px] text-amber-900/90 leading-tight">
-            {hasMindChangedBadge
-              ? "✓ Badge active: Overturned misconception in POE loop!"
-              : "Solve a POE loop on any simulation to unlock this badge."}
-          </p>
-        </div>
-      </div>
 
       <div className="border-t border-slate-200/80 my-1"></div>
 

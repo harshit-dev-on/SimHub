@@ -2,7 +2,6 @@
 
 import React from "react";
 import {
-  Play,
   CheckCircle2,
   Users,
   ChevronRight,
@@ -296,13 +295,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
 
-          {/* Hover Green Play Button Overlay */}
-          <div className="absolute inset-0 bg-slate-950/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-              <Play className="h-3.5 w-3.5 fill-white" />
-              <span>Launch</span>
-            </div>
-          </div>
+
         </div>
 
         {/* Experience Title & Author */}

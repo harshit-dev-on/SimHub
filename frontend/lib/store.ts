@@ -10,18 +10,6 @@ export interface GateResult {
   details?: Record<string, unknown>;
 }
 
-export interface PoeQuestion {
-  id: string;
-  question: string;
-  options: {
-    id: string;
-    text: string;
-    isCorrect: boolean;
-    misconceptionLabel?: string;
-  }[];
-  explanation: string;
-}
-
 export interface SimulationComment {
   id: string;
   authorName: string;
@@ -75,7 +63,6 @@ export interface SimulationEntry {
     approvedAt: string;
   };
   reportsCount: number;
-  questions: PoeQuestion[];
   comments: SimulationComment[];
   isDemoRepoB?: boolean;
   isDemoRepoA?: boolean;

@@ -24,17 +24,7 @@ import {
 } from "@/lib/supabase";
 
 export default function Home() {
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("simhub_user");
-        if (saved) return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return null;
-  });
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isProfileSetupOpen, setIsProfileSetupOpen] = useState(false);
@@ -51,7 +41,6 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [hasMindChangedBadge, setHasMindChangedBadge] = useState(false);
 
   // Restore session from localStorage on mount and sync with Supabase
   useEffect(() => {
@@ -195,9 +184,6 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
-    if (typeof window !== "undefined") {
-      setHasMindChangedBadge(localStorage.getItem("ecoverse_badge_mind_changed") === "true");
-    }
   }, [refreshTrigger]);
 
   const handleSelectSimulation = (sim: SimulationEntry) => {
@@ -290,7 +276,6 @@ export default function Home() {
           onOpenUpload={() => setIsUploadModalOpen(true)}
           onOpenAdmin={() => setCurrentView("admin")}
           onOpenEducatorVerify={() => setCurrentView("verify")}
-          hasMindChangedBadge={hasMindChangedBadge}
           currentView={currentView}
           user={user}
         />

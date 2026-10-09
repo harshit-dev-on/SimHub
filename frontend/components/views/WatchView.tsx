@@ -10,15 +10,14 @@ import {
   CheckCircle2,
   GitBranch,
   Globe,
-  Eye,
   ArrowBigUp,
   ArrowBigDown,
   Bell,
-  FileText,
-  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+  Play,
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
-import { PoeModal } from "@/components/modals/PoeModal";
 import { RedditCommentsSection } from "@/components/comments/RedditCommentsSection";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 
@@ -35,10 +34,15 @@ export const WatchView: React.FC<WatchViewProps> = ({
   onReportSimulation,
   user,
 }) => {
-  const [showPoeModal, setShowPoeModal] = useState(false);
 
   const [iframeKey, setIframeKey] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [hasReported, setHasReported] = useState(false);
+
+  // Reset index when simulation changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [simulation.id]);
 
   const [postVote, setPostVote] = useState<"up" | "down" | null>(null);
   const [postScore, setPostScore] = useState<number>(() => {
@@ -174,36 +178,60 @@ export const WatchView: React.FC<WatchViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 8 Cols: Player, Meta, Description, Comments */}
         <div className="lg:col-span-8 space-y-4">
-          {/* Main Simulation Sandbox Player (16:9 responsive frame) */}
-          <div className="relative aspect-video w-full rounded-3xl overflow-hidden bg-white border-2 border-slate-200 shadow-md">
-            {/* Player Controls Bar */}
-            <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/90 p-1.5 rounded-xl backdrop-blur-md border border-slate-200 text-xs shadow-xs">
-              <button
-                onClick={() => setIframeKey((k) => k + 1)}
-                className="p-1 text-slate-600 hover:text-slate-950 transition-colors"
-                title="Reload Simulation"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </button>
-              <a
-                href={simulation.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 text-slate-600 hover:text-slate-950 transition-colors"
-                title="Open in Sandboxed New Tab"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </div>
+          {/* Slideshow Player (16:9 responsive frame) */}
+          <div className="relative aspect-video w-full overflow-hidden bg-white border-2 border-slate-200 shadow-md flex items-center justify-center group">
+            {simulation.screenshots && simulation.screenshots.length > 0 ? (
+              <>
+                <img
+                  src={simulation.screenshots[currentImageIndex]}
+                  alt={`${simulation.title} screenshot ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
 
-            {/* Sandboxed Iframe */}
-            <iframe
-              key={iframeKey}
-              src={simulation.liveUrl}
-              title={simulation.title}
-              sandbox="allow-scripts allow-same-origin"
-              className="w-full h-full border-0 bg-white"
-            />
+                {/* Hover Green Play Button Overlay */}
+                <a
+                  href={simulation.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 bg-slate-950/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                    <Play className="h-4 w-4 fill-white" />
+                    <span>Launch</span>
+                  </div>
+                </a>
+                
+                {simulation.screenshots.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentImageIndex((i) => (i === 0 ? simulation.screenshots.length - 1 : i - 1))
+                      }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow hover:bg-white transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer z-10"
+                    >
+                      <ChevronLeft className="h-5 w-5 text-slate-700" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentImageIndex((i) => (i === simulation.screenshots.length - 1 ? 0 : i + 1))
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow hover:bg-white transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer z-10"
+                    >
+                      <ChevronRight className="h-5 w-5 text-slate-700" />
+                    </button>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-medium tracking-wide z-10 pointer-events-none">
+                      {currentImageIndex + 1} / {simulation.screenshots.length}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="text-slate-400 font-medium">No images available</div>
+            )}
           </div>
 
           {/* Title */}
@@ -282,14 +310,6 @@ export const WatchView: React.FC<WatchViewProps> = ({
                 </button>
               </div>
 
-              {/* Enter POE Learning Loop Button */}
-              <button
-                onClick={() => setShowPoeModal(true)}
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 text-xs font-bold shadow-md shadow-emerald-500/20 hover:from-emerald-600 hover:to-teal-600 transition-all cursor-pointer"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>POE Learning Loop</span>
-              </button>
 
               {/* Share */}
               <button
@@ -315,32 +335,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
             </div>
           </div>
 
-          {/* Observation Prompt Quote - Styled as pastel yellow calculus card */}
-          <div className="rounded-2xl bg-[#FEF9C3] p-4 sm:p-5 border-2 border-[#FDE68A] text-amber-950 space-y-2 shadow-xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-white text-amber-800 shadow-2xs border border-[#FDE68A]">
-                  <Eye className="h-4 w-4" />
-                </div>
-                <strong className="text-amber-950 font-black text-xs sm:text-sm">
-                  Live Update Formula &amp; Calculus
-                </strong>
-              </div>
-              <span className="text-[10px] font-bold bg-[#FEF08A] text-amber-900 px-2.5 py-0.5 rounded-full border border-[#FDE68A] shadow-2xs">
-                Instant Calculus
-              </span>
-            </div>
 
-            <div className="bg-white rounded-xl p-3 border border-[#FDE68A]/80 font-mono text-xs text-slate-800 space-y-1">
-              <div className="flex justify-between text-slate-600 text-[11px]">
-                <span>Observation Prompt:</span>
-                <span className="font-bold text-amber-900">f(x) = x²</span>
-              </div>
-              <p className="font-sans font-medium text-slate-900 leading-relaxed pt-1">
-                &ldquo;{simulation.observationPrompt}&rdquo;
-              </p>
-            </div>
-          </div>
 
           {/* Reddit-Style Comment & Upvote/Downvote System */}
           <RedditCommentsSection
@@ -357,49 +352,10 @@ export const WatchView: React.FC<WatchViewProps> = ({
 
         {/* Right 4 Cols: Dedicated Description & Technical Details Sidebar */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5 lg:sticky lg:top-4">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#FEF9C3] text-amber-900 border border-[#FDE68A] shadow-2xs">
-                  <FileText className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                    Description
-                  </h3>
-                  <div className="text-[11px] text-slate-500 font-medium">
-                    Simulation Overview
-                  </div>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold bg-[#FEF9C3] text-amber-950 px-2.5 py-1 rounded-full border border-[#FDE68A]">
-                {simulation.topic}
-              </span>
-            </div>
-
-            {/* Quick Badges Row */}
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                6/6 Hard Gates Passed
-              </span>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700 border border-slate-200">
-                {simulation.gradeLevel || "Advanced STEM"}
-              </span>
-            </div>
-
+          <div className="space-y-5 lg:sticky lg:top-4">
             {/* Description Text (Rendered as GitHub README.md) */}
-            <div className="space-y-2">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                <span>About this Simulation</span>
-                <span className="font-mono text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                  README.md
-                </span>
-              </h4>
-              <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
-                <MarkdownRenderer content={simulation.description} />
-              </div>
+            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
+              <MarkdownRenderer content={simulation.description} />
             </div>
 
             {/* Key Telemetry Stats */}
@@ -471,13 +427,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
         </div>
       </div>
 
-      {/* POE Learning Loop Modal */}
-      {showPoeModal && (
-        <PoeModal
-          simulation={simulation}
-          onClose={() => setShowPoeModal(false)}
-        />
-      )}
+
     </div>
   );
 };

@@ -267,7 +267,7 @@ export const RedditCommentsSection: React.FC<RedditCommentsSectionProps> = ({
   });
 
   return (
-    <div className="rounded-3xl bg-white border border-slate-200 p-4 sm:p-6 space-y-5 shadow-xs">
+    <div className="space-y-5">
       {/* 1. Reddit Header & Sorting */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-2">

@@ -34,14 +34,12 @@ export {
   AuthModal,
   ProfileSetupModal,
   UploadModal,
-  PoeModal,
   InterstitialModal,
 } from "./modals";
 export type {
   AuthModalProps,
   ProfileSetupModalProps,
   UploadModalProps,
-  PoeModalProps,
   InterstitialModalProps,
 } from "./modals";
 

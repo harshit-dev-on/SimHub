@@ -5,8 +5,6 @@ import {
   ArrowLeft,
   RotateCcw,
   ExternalLink,
-  Sparkles,
-  Eye,
   GitBranch,
   Globe,
   Flag,
@@ -14,7 +12,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { SimulationEntry } from "@/lib/store";
-import { PoeModal } from "@/components/modals/PoeModal";
 
 export interface SimulationWorkbenchProps {
   simulation: SimulationEntry;
@@ -32,7 +29,6 @@ export const SimulationWorkbench: React.FC<SimulationWorkbenchProps> = ({
   onBackToCatalogue,
   onReportSimulation,
 }) => {
-  const [showPoeModal, setShowPoeModal] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
   const [hasReported, setHasReported] = useState(false);
 
@@ -149,31 +145,6 @@ export const SimulationWorkbench: React.FC<SimulationWorkbenchProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Guiding Question / Observation Focus */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Observation Focus Banner */}
-          <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-6 shadow-xs relative overflow-hidden">
-            <div className="flex items-start gap-3.5">
-              <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0">
-                <Eye className="h-5 w-5" />
-              </div>
-              <div className="space-y-1.5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                  Guiding Scientific Inquiry
-                </h3>
-                <p className="text-sm font-medium text-slate-800 leading-relaxed">
-                  &ldquo;{simulation.observationPrompt}&rdquo;
-                </p>
-                <div className="pt-2">
-                  <button
-                    onClick={() => setShowPoeModal(true)}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 hover:text-amber-950 underline underline-offset-4 transition-colors"
-                  >
-                    <span>Test your mental model in the 3-step POE Loop</span>
-                    <span>→</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Scientific Framework & Details Card */}
           <div className="rounded-2xl border border-slate-800/80 bg-slate-950 p-6 shadow-xs space-y-4">
@@ -275,13 +246,7 @@ export const SimulationWorkbench: React.FC<SimulationWorkbenchProps> = ({
         </div>
       </div>
 
-      {/* POE Learning Loop Modal */}
-      {showPoeModal && (
-        <PoeModal
-          simulation={simulation}
-          onClose={() => setShowPoeModal(false)}
-        />
-      )}
+
     </div>
   );
 };

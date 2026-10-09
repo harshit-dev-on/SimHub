@@ -7,8 +7,6 @@ export type { ProfileSetupModalProps } from "./ProfileSetupModal";
 export { UploadModal } from "./UploadModal";
 export type { UploadModalProps } from "./UploadModal";
 
-export { PoeModal } from "./PoeModal";
-export type { PoeModalProps } from "./PoeModal";
 
 export { InterstitialModal } from "./InterstitialModal";
 export type { InterstitialModalProps } from "./InterstitialModal";
