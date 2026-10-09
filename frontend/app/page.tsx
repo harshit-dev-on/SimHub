@@ -11,7 +11,6 @@ import {
   UploadModal,
   AuthModal,
   ProfileSetupModal,
-  EducatorConsole,
   AdminQueue,
 } from "@/components";
 import { SimulationEntry } from "@/lib/store";
@@ -32,7 +31,7 @@ export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [currentView, setCurrentView] = useState<
-    "feed" | "watch" | "verify" | "admin" | "subscriptions"
+    "feed" | "watch" | "admin" | "subscriptions"
   >("feed");
   const [selectedSim, setSelectedSim] = useState<SimulationEntry | null>(null);
 
@@ -275,7 +274,6 @@ export default function Home() {
           onOpenSubscriptions={() => setCurrentView("subscriptions")}
           onOpenUpload={() => user ? setIsUploadModalOpen(true) : setIsAuthModalOpen(true)}
           onOpenAdmin={() => setCurrentView("admin")}
-          onOpenEducatorVerify={() => setCurrentView("verify")}
           currentView={currentView}
           user={user}
         />
@@ -315,16 +313,6 @@ export default function Home() {
             />
           )}
 
-          {currentView === "verify" && (
-            <div className="max-w-7xl mx-auto p-4 sm:p-6">
-              <EducatorConsole
-                onSubmissionSuccess={() => {
-                  setRefreshTrigger((prev) => prev + 1);
-                  setCurrentView("admin");
-                }}
-              />
-            </div>
-          )}
 
           {currentView === "admin" && (
             <div className="max-w-7xl mx-auto p-4 sm:p-6">

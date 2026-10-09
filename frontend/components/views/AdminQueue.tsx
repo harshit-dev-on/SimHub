@@ -126,15 +126,15 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Moderator Review &amp; Drift Audit Queue</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-xl font-bold text-stone-900">Moderator Review &amp; Drift Audit Queue</h2>
+          <p className="text-xs text-stone-500">
             Admins review gate outputs, approve listings with immutable SHA-256 fingerprints, and run live drift re-verifications.
           </p>
         </div>
 
         <button
           onClick={fetchQueue}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-xs text-slate-300 hover:text-white"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-xs text-stone-700 hover:bg-stone-50"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           <span>Refresh Queue</span>
@@ -159,12 +159,12 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
               key={sim.id}
               className={`rounded-xl border p-5 transition-all ${
                 sim.status === "approved"
-                  ? "border-emerald-500/30 bg-slate-900/60"
+                  ? "border-emerald-200 bg-emerald-50/50"
                   : sim.status === "restricted"
-                  ? "border-rose-500/40 bg-rose-500/5"
+                  ? "border-rose-200 bg-rose-50/50"
                   : sim.status === "drift_flagged"
-                  ? "border-amber-500/40 bg-amber-500/5"
-                  : "border-slate-800 bg-slate-900/80"
+                  ? "border-amber-200 bg-amber-50/50"
+                  : "border-stone-200 bg-white"
               }`}
             >
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -173,22 +173,22 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border uppercase tracking-wide ${
                         sim.status === "approved"
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                          ? "bg-emerald-100 text-emerald-700 border-emerald-200"
                           : sim.status === "restricted"
-                          ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                          ? "bg-rose-100 text-rose-700 border-rose-200"
                           : sim.status === "drift_flagged"
-                          ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                          : "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+                          ? "bg-amber-100 text-amber-700 border-amber-200"
+                          : "bg-cyan-100 text-cyan-700 border-cyan-200"
                       }`}
                     >
                       {sim.status}
                     </span>
 
-                    <span className="text-xs text-slate-400 font-mono">
+                    <span className="text-xs text-stone-500 font-mono">
                       Publisher: {sim.authorLogin} (#{sim.authorNumericId})
                     </span>
 
-                    <span className="text-xs text-slate-500 font-mono">
+                    <span className="text-xs text-stone-400 font-mono">
                       Repo: #{sim.repoNumericId}
                     </span>
 
@@ -199,18 +199,18 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                     )}
                   </div>
 
-                  <h3 className="text-base font-bold text-white">{sim.title}</h3>
-                  <p className="text-xs text-slate-400 line-clamp-1">{sim.description}</p>
+                  <h3 className="text-base font-bold text-stone-900">{sim.title}</h3>
+                  <p className="text-xs text-stone-600 line-clamp-1">{sim.description}</p>
 
                   {/* Fingerprint / Reason */}
                   {sim.statusReason && (
-                    <div className="text-[11px] text-slate-300 font-mono mt-1">
-                      Status Note: <span className="text-amber-300">{sim.statusReason}</span>
+                    <div className="text-[11px] text-stone-500 font-mono mt-1">
+                      Status Note: <span className="text-amber-700">{sim.statusReason}</span>
                     </div>
                   )}
 
                   {sim.fingerprint && (
-                    <div className="text-[10px] text-slate-500 font-mono mt-1 flex flex-wrap gap-3">
+                    <div className="text-[10px] text-stone-400 font-mono mt-1 flex flex-wrap gap-3">
                       <span>HTML SHA: {sim.fingerprint.htmlSha.substring(0, 16)}...</span>
                       <span>Scripts Scanned: {sim.fingerprint.scannedScripts}</span>
                       <span>Approved: {new Date(sim.fingerprint.approvedAt).toLocaleTimeString()}</span>
@@ -233,7 +233,7 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                   <button
                     onClick={() => handleReverify(sim)}
                     disabled={reverifyingId === sim.id}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 font-semibold text-xs hover:bg-cyan-500/20 transition-all"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-700 font-semibold text-xs hover:bg-cyan-100 transition-all"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${reverifyingId === sim.id ? "animate-spin" : ""}`} />
                     <span>{reverifyingId === sim.id ? "Auditing Live Gates..." : "Re-Verify Now"}</span>
@@ -243,7 +243,7 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                     <button
                       onClick={() => handleHide(sim)}
                       disabled={hidingId === sim.id}
-                      className="px-4 py-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold text-xs hover:bg-amber-500/20 transition-all"
+                      className="px-4 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 font-bold text-xs hover:bg-amber-100 transition-all"
                     >
                       {hidingId === sim.id ? "Hiding..." : "Hide"}
                     </button>
@@ -252,7 +252,7 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                   <button
                     onClick={() => handleDelete(sim)}
                     disabled={deletingId === sim.id}
-                    className="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 font-bold text-xs hover:bg-rose-500/20 transition-all"
+                    className="px-4 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-bold text-xs hover:bg-rose-100 transition-all"
                   >
                     {deletingId === sim.id ? "Deleting..." : "Delete"}
                   </button>
@@ -261,7 +261,7 @@ export const AdminQueue: React.FC<AdminQueueProps> = ({ onQueueUpdated, refreshT
                     href={sim.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white"
+                    className="p-2 rounded-xl border border-stone-200 bg-white text-stone-500 hover:text-stone-800 hover:bg-stone-50"
                     title="Inspect live URL in sandboxed tab"
                   >
                     <ExternalLink className="h-4 w-4" />

@@ -26,7 +26,6 @@ export interface SidebarProps {
   onOpenSubscriptions: () => void;
   onOpenUpload?: () => void;
   onOpenAdmin: () => void;
-  onOpenEducatorVerify: () => void;
   currentView?: string;
   user?: UserProfile | null;
 }
@@ -39,7 +38,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSubscriptions,
   onOpenUpload,
   onOpenAdmin,
-  onOpenEducatorVerify,
   currentView = "feed",
   user,
 }) => {
@@ -84,14 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>{t.subscriptions}</span>
         </button>
 
-        <button
-          onClick={onOpenEducatorVerify}
-          className="flex flex-col items-center gap-1 text-[10px] text-slate-600 hover:text-slate-900 cursor-pointer"
-          title="Security & Gates"
-        >
-          <ShieldCheck className="h-5 w-5" />
-          <span>Gates</span>
-        </button>
+
 
         {user?.role === "admin" && (
           <button
@@ -173,19 +164,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="border-t border-slate-200/80 my-1"></div>
 
-      {/* Security & Verification Tools */}
+      {/* Admin Tools */}
       <div className="space-y-1">
-        <div className="px-3 py-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-          Creator Studio
-        </div>
-
-        <button
-          onClick={onOpenEducatorVerify}
-          className="w-full flex items-center gap-3.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition-colors cursor-pointer"
-        >
-          <ShieldCheck className="h-4 w-4 text-emerald-600" />
-          <span>{t.verify}</span>
-        </button>
+        {user?.role === "admin" && (
+          <div className="px-3 py-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            Admin Tools
+          </div>
+        )}
 
         {user?.role === "admin" && (
           <button
