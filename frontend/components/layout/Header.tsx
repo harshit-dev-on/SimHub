@@ -139,13 +139,17 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onGoHome}
           className="flex items-center gap-2 cursor-pointer select-none group"
         >
-          <div className="flex h-7 w-9 items-center justify-center rounded-lg bg-red-600 text-white shadow-md shadow-red-600/30 group-hover:scale-105 transition-transform">
-            <span className="text-xs font-black">▶</span>
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-lg font-bold tracking-tight text-slate-900 font-sans">
-              Sim<span className="text-red-600">Hub</span>
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#171717] rounded-full group-hover:scale-105 transition-transform shadow-md">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 -ml-1">
+              <path d="M4 10L12 16L20 10" stroke="#4ade80" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="16" r="3.5" fill="#ff6b4a" stroke="white" strokeWidth="2"/>
+            </svg>
+            <span className="text-white font-extrabold tracking-tight text-[17px] font-sans pb-0.5">
+              SimHub
             </span>
+          </div>
+          
+          <div className="flex items-baseline gap-1 hidden sm:flex">
             <span className="text-[10px] font-bold text-amber-700 bg-[#FEF9C3] px-1.5 py-0.5 rounded-md border border-[#FDE68A] uppercase tracking-tighter">
               EDU
             </span>
